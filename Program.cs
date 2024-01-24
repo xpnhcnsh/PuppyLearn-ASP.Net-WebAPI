@@ -20,6 +20,7 @@ builder.Services.AddAutoMapper(typeof(UserProfiles));
 
 // Service register
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBookService, BookService>();
 
 // 使service层可以获取HttpContext，从而获取用户信息
 builder.Services.AddHttpContextAccessor();

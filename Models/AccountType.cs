@@ -1,4 +1,7 @@
-﻿namespace PuppyLearn.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace PuppyLearn.Models;
 
 public partial class AccountType
 {

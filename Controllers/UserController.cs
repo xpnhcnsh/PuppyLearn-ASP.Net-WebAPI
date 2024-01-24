@@ -16,7 +16,7 @@ namespace PuppyLearn.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<Return2Front> Register([FromBody] RegisterDto registerDto, CancellationToken cancellationToken)
+        public async Task<ReturnValue> Register([FromBody] RegisterDto registerDto, CancellationToken cancellationToken)
         {
             try
             {
@@ -25,7 +25,7 @@ namespace PuppyLearn.Controllers
             }
             catch(Exception ex)
             {
-                return new Return2Front
+                return new ReturnValue
                 {
                     Value = ex.Message,
                     Msg = "error",
@@ -35,7 +35,7 @@ namespace PuppyLearn.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<Return2Front> Login([FromBody] LoginDto loginDto, CancellationToken cancellation)
+        public async Task<ReturnValue> Login([FromBody] LoginDto loginDto, CancellationToken cancellation)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace PuppyLearn.Controllers
             }
             catch(Exception ex)
             {
-                return new Return2Front
+                return new ReturnValue
                 {
                     Value = ex.Message,
                     Msg = "error",

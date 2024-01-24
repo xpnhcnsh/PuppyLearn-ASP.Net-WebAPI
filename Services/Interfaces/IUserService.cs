@@ -7,8 +7,8 @@ namespace PuppyLearn.Services.Interfaces
 {
     public interface IUserService
     {
-        public  Task<Return2Front> Register(RegisterDto registerDto, CancellationToken cancellationToken);
-        public  Task<Return2Front> Login(LoginDto loginDto, CancellationToken cancellationToken);
+        public  Task<ReturnValue> Register(RegisterDto registerDto, CancellationToken cancellationToken);
+        public  Task<ReturnValue> Login(LoginDto loginDto, CancellationToken cancellationToken);
     }
 
 }

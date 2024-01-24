@@ -17,13 +17,13 @@ namespace PuppyLearn.Services
             _mapper = mapper;
         }
 
-        public async Task<Return2Front> Register(RegisterDto registerDto, CancellationToken cancellationToken)
+        public async Task<ReturnValue> Register(RegisterDto registerDto, CancellationToken cancellationToken)
         {
             var res = await _context.Users.FirstOrDefaultAsync(x=>(x.UserName==registerDto.UserName)|(x.Email==registerDto.Email));
             if (res != null) 
             {
                 registerDto.Password = "null";
-                return new Return2Front
+                return new ReturnValue
                 {
                     Value = registerDto,
                     HttpCode = 406,
@@ -37,16 +37,16 @@ namespace PuppyLearn.Services
             await _context.Users.AddAsync(newUser, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            return new Return2Front { Value =_mapper.Map<UserDto>(newUser), HttpCode=200, Msg="注册成功，返回新增用户信息" };
+            return new ReturnValue { Value =_mapper.Map<UserDto>(newUser), HttpCode=200, Msg="注册成功，返回新增用户信息" };
         }
 
-        public async Task<Return2Front> Login(LoginDto loginDto, CancellationToken cancellationToken)
+        public async Task<ReturnValue> Login(LoginDto loginDto, CancellationToken cancellationToken)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => (x.UserName == loginDto.UserName) | (x.Email==loginDto.Email), cancellationToken);
 
             if (user == null) 
             {
-                return new Return2Front
+                return new ReturnValue
                 {
                     Value = _mapper.Map<UserDto>(loginDto),
                     Msg = "用户名或邮箱不存在",
@@ -56,14 +56,14 @@ namespace PuppyLearn.Services
             var flag = Hasher.VerifyPassword(loginDto.Password, user.PasswordHash, Convert.FromBase64String(user.PasswordSalt));
             if (!flag)
             {
-                return new Return2Front
+                return new ReturnValue
                 {
                     Value = _mapper.Map<UserDto>(loginDto),
                     Msg = "密码错误",
                     HttpCode = 404
                 };
             }
-            return new Return2Front
+            return new ReturnValue
             {
                 Value = _mapper.Map<UserDto>(loginDto),
                 Msg = "登录成功",
