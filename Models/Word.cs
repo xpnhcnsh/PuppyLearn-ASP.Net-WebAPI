@@ -13,11 +13,6 @@ public partial class Word
     public string WordName { get; set; } = null!;
 
     /// <summary>
-    /// 来自哪本单词书
-    /// </summary>
-    public Guid BookId { get; set; }
-
-    /// <summary>
     /// 英式音标
     /// </summary>
     public string? Ukphone { get; set; }
@@ -36,8 +31,6 @@ public partial class Word
     /// 美式发音请求url
     /// </summary>
     public string? Usspeech { get; set; }
-
-    public virtual BooksEn Book { get; set; } = null!;
 
     public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();
 

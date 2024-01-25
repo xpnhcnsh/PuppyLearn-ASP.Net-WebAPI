@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace PuppyLearn.Models;
 
@@ -41,9 +43,7 @@ public partial class PuppyLearnContext : DbContext
 
     public virtual DbSet<Word> Words { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost;Database=PuppyLearn;User ID=sa;Password=xp459101071;Encrypt=False");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -456,9 +456,6 @@ public partial class PuppyLearnContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
-            entity.Property(e => e.BookId)
-                .HasComment("来自哪本单词书")
-                .HasColumnName("bookId");
             entity.Property(e => e.Ukphone)
                 .HasMaxLength(100)
                 .HasComment("英式音标")
@@ -479,11 +476,6 @@ public partial class PuppyLearnContext : DbContext
                 .HasMaxLength(50)
                 .HasComment("单词")
                 .HasColumnName("wordName");
-
-            entity.HasOne(d => d.Book).WithMany(p => p.Words)
-                .HasForeignKey(d => d.BookId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Words_Books_en");
         });
 
         OnModelCreatingPartial(modelBuilder);

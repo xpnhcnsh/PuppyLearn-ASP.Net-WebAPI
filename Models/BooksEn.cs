@@ -29,6 +29,4 @@ public partial class BooksEn
     public virtual ICollection<UserBook> UserBooks { get; set; } = new List<UserBook>();
 
     public virtual ICollection<UserVocabulary> UserVocabularies { get; set; } = new List<UserVocabulary>();
-
-    public virtual ICollection<Word> Words { get; set; } = new List<Word>();
 }

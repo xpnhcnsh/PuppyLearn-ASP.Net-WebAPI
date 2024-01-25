@@ -51,6 +51,7 @@ namespace PuppyLearn.Services
                     foreach (var wordObj in jsonBookObj)
                     {
                         await Console.Out.WriteLineAsync((string)wordObj.headWord.Value);
+                        string wordName = (string)wordObj.headWord.Value;
                         string ukphone = (wordObj.content.word.content["ukphone"] != null) ? (string)wordObj.content.word.content.ukphone.Value : "";
                         string usphone = (wordObj.content.word.content["usphone"] != null) ? (string)wordObj.content.word.content.usphone.Value : "";
                         string ukspeech = (wordObj.content.word.content["ukspeech"] != null) ? (string)wordObj.content.word.content.ukspeech.Value : "";
@@ -58,8 +59,7 @@ namespace PuppyLearn.Services
                         var wordsEntry = new Word
                         {
                             Id = Guid.NewGuid(),
-                            WordName = (string)wordObj.headWord.Value,
-                            BookId = book.Id,
+                            WordName = wordName,
                             Ukphone = ukphone,
                             Usphone = usphone,
                             Ukspeech = ukspeech,
