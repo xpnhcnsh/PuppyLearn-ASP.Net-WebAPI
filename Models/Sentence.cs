@@ -28,6 +28,4 @@ public partial class Sentence
     public string SentenceCn { get; set; } = null!;
 
     public virtual BooksEn Book { get; set; } = null!;
-
-    public virtual ICollection<Word> Words { get; set; } = new List<Word>();
 }
