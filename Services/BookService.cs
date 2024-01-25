@@ -52,6 +52,7 @@ namespace PuppyLearn.Services
                     {
                         await Console.Out.WriteLineAsync((string)wordObj.headWord.Value);
                         string wordName = (string)wordObj.headWord.Value;
+                        // TBD: 检查Words表里是否已经有这个单词，如果有有，Id用已有的，然后跳过Words表的插入
                         string ukphone = (wordObj.content.word.content["ukphone"] != null) ? (string)wordObj.content.word.content.ukphone.Value : "";
                         string usphone = (wordObj.content.word.content["usphone"] != null) ? (string)wordObj.content.word.content.usphone.Value : "";
                         string ukspeech = (wordObj.content.word.content["ukspeech"] != null) ? (string)wordObj.content.word.content.ukspeech.Value : "";
