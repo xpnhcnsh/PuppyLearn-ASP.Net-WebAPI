@@ -59,7 +59,7 @@ namespace PuppyLearn.Services
                     {
                         await Console.Out.WriteLineAsync((string)wordObj.headWord.Value);
 
-                        #region check if the word already exist
+
                         string wordName = (string)wordObj.headWord.Value;
                         //bool isWordExist = await _context.Words.Where(a => a.WordName == wordName).FirstOrDefaultAsync() != null;
                         Guid wordId;
@@ -71,36 +71,26 @@ namespace PuppyLearn.Services
                         string speech;
                         string usphone;
 
-                        if (false)
-                        {
-                            wordEntry = _context.Words.Where(a=>a.WordName==wordName).SingleAsync().Result;
-                        }
-                        else
-                        {
-                            wordId = Guid.NewGuid();
-                            ukphone = (wordObj.content.word.content["ukphone"] != null) ? (string)wordObj.content.word.content.ukphone.Value : "";
-                            usphone = (wordObj.content.word.content["usphone"] != null) ? (string)wordObj.content.word.content.usphone.Value : "";
-                            ukspeech = (wordObj.content.word.content["ukspeech"] != null) ? (string)wordObj.content.word.content.ukspeech.Value : "";
-                            usspeech = (wordObj.content.word.content["usspeech"] != null) ? (string)wordObj.content.word.content.usspeech.Value : "";
-                            phone = (wordObj.content.word.content["phone"] != null) ? (string)wordObj.content.word.content.phone.Value : "";
-                            speech = (wordObj.content.word.content["speech"] != null) ? (string)wordObj.content.word.content.speech.Value : "";
+                        wordId = Guid.NewGuid();
+                        ukphone = (wordObj.content.word.content["ukphone"] != null) ? (string)wordObj.content.word.content.ukphone.Value : "";
+                        usphone = (wordObj.content.word.content["usphone"] != null) ? (string)wordObj.content.word.content.usphone.Value : "";
+                        ukspeech = (wordObj.content.word.content["ukspeech"] != null) ? (string)wordObj.content.word.content.ukspeech.Value : "";
+                        usspeech = (wordObj.content.word.content["usspeech"] != null) ? (string)wordObj.content.word.content.usspeech.Value : "";
+                        phone = (wordObj.content.word.content["phone"] != null) ? (string)wordObj.content.word.content.phone.Value : "";
+                        speech = (wordObj.content.word.content["speech"] != null) ? (string)wordObj.content.word.content.speech.Value : "";
 
-                            wordEntry = new Word
-                            {
-                                Id = wordId,
-                                WordName = wordName,
-                                BookId = bookId,
-                                Ukphone = ukphone,
-                                Usphone = usphone,
-                                Ukspeech = ukspeech,
-                                Usspeech = usspeech,
-                                Speech = speech,
-                                Phone = phone
-                            };
-                        }
-
-                        
-                        #endregion
+                        wordEntry = new Word
+                        {
+                            Id = wordId,
+                            WordName = wordName,
+                            BookId = bookId,
+                            Ukphone = ukphone,
+                            Usphone = usphone,
+                            Ukspeech = ukspeech,
+                            Usspeech = usspeech,
+                            Speech = speech,
+                            Phone = phone
+                        };
 
                         #region table sentences
                         if (wordObj.content.word.content["sentence"] != null)
@@ -275,13 +265,7 @@ namespace PuppyLearn.Services
                             await _context.RemMethods.AddAsync(remMethod);
                         }
                         #endregion
-
-
-                        // 如果本单词存在则不再存储Words表，只对前面本单词的其他相关表进行添加。
-                        if (true)
-                        {
-                            await _context.Words.AddAsync(wordEntry);
-                        }
+                        await _context.Words.AddAsync(wordEntry);
                         }
                     #endregion
                     await _context.SaveChangesAsync();  
