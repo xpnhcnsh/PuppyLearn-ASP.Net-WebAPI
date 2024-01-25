@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization.Infrastructure;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
+﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PuppyLearn.Models;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
-using System.Net;
 
 namespace PuppyLearn.Services
 {
@@ -31,41 +28,79 @@ namespace PuppyLearn.Services
                     dynamic jsonBookObj = JsonConvert.DeserializeObject(jsonBook);
                     var wordsCount = jsonBookObj.Count;
 
-                    #region get data for table Books_en and insert.
+                    #region get bookName from table Books_en and check existence first.
                     var bookName = (string)jsonBookObj.First.bookId.Value;
-                    if (_context.BooksEns.Select(a=>a.BookName).ToList().Contains(bookName))
-                    {
-                        continue;
-                    }
                     await Console.Out.WriteLineAsync(bookName);
+                    bool isBookExist = await _context.BooksEns.Where(a => a.BookName==bookName).FirstOrDefaultAsync() !=null;
+                    Guid bookId;
+                    if (isBookExist)
+                    {
+                        bookId = await _context.BooksEns.Where(a=>a.BookName== bookName).Select(a=>a.Id).SingleOrDefaultAsync();
+                    }
+                    else
+                    {
+                        bookId = Guid.NewGuid();
+                    }
+                    
                     var book = new BooksEn
                     {
-                        Id = Guid.NewGuid(),
+                        Id = bookId,
                         BookName = bookName,
                         WordsCount = wordsCount
                     };
-                    await _context.BooksEns.AddAsync(book);
+                    if (!isBookExist)
+                    {
+                        await _context.BooksEns.AddAsync(book);
+                    }
                     #endregion
 
                     #region insert into all other tables for each word interating
                     foreach (var wordObj in jsonBookObj)
                     {
                         await Console.Out.WriteLineAsync((string)wordObj.headWord.Value);
+
+                        #region check if the word already exist
                         string wordName = (string)wordObj.headWord.Value;
-                        // TBD: 检查Words表里是否已经有这个单词，如果有有，Id用已有的，然后跳过Words表的插入
-                        string ukphone = (wordObj.content.word.content["ukphone"] != null) ? (string)wordObj.content.word.content.ukphone.Value : "";
-                        string usphone = (wordObj.content.word.content["usphone"] != null) ? (string)wordObj.content.word.content.usphone.Value : "";
-                        string ukspeech = (wordObj.content.word.content["ukspeech"] != null) ? (string)wordObj.content.word.content.ukspeech.Value : "";
-                        string usspeech = (wordObj.content.word.content["usspeech"] != null) ? (string)wordObj.content.word.content.usspeech.Value : "";
-                        var wordsEntry = new Word
+                        //bool isWordExist = await _context.Words.Where(a => a.WordName == wordName).FirstOrDefaultAsync() != null;
+                        Guid wordId;
+                        Word wordEntry;
+                        string ukphone;
+                        string ukspeech;
+                        string usspeech;
+                        string phone;
+                        string speech;
+                        string usphone;
+
+                        if (false)
                         {
-                            Id = Guid.NewGuid(),
-                            WordName = wordName,
-                            Ukphone = ukphone,
-                            Usphone = usphone,
-                            Ukspeech = ukspeech,
-                            Usspeech = usspeech,
-                        };
+                            wordEntry = _context.Words.Where(a=>a.WordName==wordName).SingleAsync().Result;
+                        }
+                        else
+                        {
+                            wordId = Guid.NewGuid();
+                            ukphone = (wordObj.content.word.content["ukphone"] != null) ? (string)wordObj.content.word.content.ukphone.Value : "";
+                            usphone = (wordObj.content.word.content["usphone"] != null) ? (string)wordObj.content.word.content.usphone.Value : "";
+                            ukspeech = (wordObj.content.word.content["ukspeech"] != null) ? (string)wordObj.content.word.content.ukspeech.Value : "";
+                            usspeech = (wordObj.content.word.content["usspeech"] != null) ? (string)wordObj.content.word.content.usspeech.Value : "";
+                            phone = (wordObj.content.word.content["phone"] != null) ? (string)wordObj.content.word.content.phone.Value : "";
+                            speech = (wordObj.content.word.content["speech"] != null) ? (string)wordObj.content.word.content.speech.Value : "";
+
+                            wordEntry = new Word
+                            {
+                                Id = wordId,
+                                WordName = wordName,
+                                BookId = bookId,
+                                Ukphone = ukphone,
+                                Usphone = usphone,
+                                Ukspeech = ukspeech,
+                                Usspeech = usspeech,
+                                Speech = speech,
+                                Phone = phone
+                            };
+                        }
+
+                        
+                        #endregion
 
                         #region table sentences
                         if (wordObj.content.word.content["sentence"] != null)
@@ -79,7 +114,7 @@ namespace PuppyLearn.Services
                                 var sentencesEntry = new Sentence
                                 {
                                     Id = Guid.NewGuid(),
-                                    WordId = wordsEntry.Id,
+                                    WordId = wordEntry.Id,
                                     BookId = book.Id,
                                     SentenceCn = sentenceCn,
                                     SentenceEn = sentenceEn,
@@ -87,7 +122,6 @@ namespace PuppyLearn.Services
                                 await _context.Sentences.AddAsync(sentencesEntry);
                             }
                         }
-
                         #endregion
 
                         #region table Synonymous
@@ -106,7 +140,7 @@ namespace PuppyLearn.Services
                                     var synosEntry = new Synonymou
                                     {
                                         Id = Guid.NewGuid(),
-                                        WordId = wordsEntry.Id,
+                                        WordId = wordEntry.Id,
                                         BookId = book.Id,
                                         Pos = pos,
                                         TransCn = transCn,
@@ -129,7 +163,7 @@ namespace PuppyLearn.Services
                                 var phrasesEntry = new Phrase
                                 {
                                     Id = Guid.NewGuid(),
-                                    WordId = wordsEntry.Id,
+                                    WordId = wordEntry.Id,
                                     BookId = book.Id,
                                     PhraseEn = phraseEn,
                                     PhraseCn = phraseCn
@@ -137,8 +171,6 @@ namespace PuppyLearn.Services
                                 await _context.Phrases.AddAsync(phrasesEntry);
                             }
                         }
-
-
                         #endregion
 
                         #region table Cognate
@@ -157,7 +189,7 @@ namespace PuppyLearn.Services
                                     var cognatesEntry = new Cognate
                                     {
                                         Id = Guid.NewGuid(),
-                                        WordId = wordsEntry.Id,
+                                        WordId = wordEntry.Id,
                                         BookId = book.Id,
                                         CognateCn = cognateCn,
                                         CognateEn = cognateEn,
@@ -167,7 +199,6 @@ namespace PuppyLearn.Services
                                 }
                             }
                         }
-
                         #endregion
 
                         #region table Trans
@@ -187,7 +218,7 @@ namespace PuppyLearn.Services
                                 var transEntry = new Tran
                                 {
                                     Id = Guid.NewGuid(),
-                                    WordId = wordsEntry.Id,
+                                    WordId = wordEntry.Id,
                                     BookId = book.Id,
                                     TransCn = transCn,
                                     TransEn = transEn,
@@ -216,7 +247,7 @@ namespace PuppyLearn.Services
                                 var singleChoiceQuestionsEntry = new SingleChoiceQuestion
                                 {
                                     Id = Guid.NewGuid(),
-                                    WordId = wordsCount.Id,
+                                    WordId = wordEntry.Id,
                                     BookId = book.Id,
                                     QuestionEn = questionEn,
                                     AnsExplainCn = ansExplainCn,
@@ -230,27 +261,37 @@ namespace PuppyLearn.Services
                             }
                         }
                         #endregion
-                        await _context.Words.AddAsync(wordsEntry);
+
+                        #region table RemMethod
+                        if (wordObj.content.word.content["remMethod"] != null)
+                        {
+                            var remMethod = new RemMethod 
+                            { 
+                                Id = Guid.NewGuid(),
+                                WordId = wordEntry.Id,
+                                BookId = book.Id,
+                                Method = (string)wordObj.content.word.content.remMethod.val.Value
+                            };
+                            await _context.RemMethods.AddAsync(remMethod);
                         }
                         #endregion
 
 
-                        //foreach (var jsonBoookObj in jsonBookObjs)
-                        //{
-                        //    var word = new
-                        //    {
-                        //        bookName = jsonBoookObj.bookId.split("_")[0],
-
-                        //    };
-                        //} 
-                        await _context.SaveChangesAsync();  
+                        // 如果本单词存在则不再存储Words表，只对前面本单词的其他相关表进行添加。
+                        if (true)
+                        {
+                            await _context.Words.AddAsync(wordEntry);
+                        }
+                        }
+                    #endregion
+                    await _context.SaveChangesAsync();  
                 }
-                //var res = JsonConvert.SerializeObject(booksEntoUpdate);
+
                 return new ReturnValue
                 {
-                    Value = null,
+                    Value = url,
                     HttpCode = 200,
-                    Msg = "找到路径，返回文件名列表"
+                    Msg = "迁移完毕"
                 };
 
             }

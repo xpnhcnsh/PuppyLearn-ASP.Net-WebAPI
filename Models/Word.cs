@@ -12,6 +12,8 @@ public partial class Word
     /// </summary>
     public string WordName { get; set; } = null!;
 
+    public Guid BookId { get; set; }
+
     /// <summary>
     /// 英式音标
     /// </summary>
@@ -32,7 +34,18 @@ public partial class Word
     /// </summary>
     public string? Usspeech { get; set; }
 
+    /// <summary>
+    /// 有些只有一个phone
+    /// </summary>
+    public string? Phone { get; set; }
+
+    public string? Speech { get; set; }
+
+    public virtual BooksEn Book { get; set; } = null!;
+
     public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();
+
+    public virtual ICollection<RemMethod> RemMethods { get; set; } = new List<RemMethod>();
 
     public virtual ICollection<SingleChoiceQuestion> SingleChoiceQuestions { get; set; } = new List<SingleChoiceQuestion>();
 

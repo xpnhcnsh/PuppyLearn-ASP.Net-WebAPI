@@ -1,0 +1,9 @@
+delete from dbo.Phrases;
+delete from dbo.RemMethod;
+delete from dbo.Cognate;
+delete from dbo.Sentences;
+delete from dbo.SingleChoiceQuestions;
+delete from dbo.Synonymous;
+delete from dbo.Trans;
+delete from dbo.Words;
+delete from dbo.Books_en;

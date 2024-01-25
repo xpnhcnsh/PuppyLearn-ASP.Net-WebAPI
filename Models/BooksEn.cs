@@ -20,6 +20,8 @@ public partial class BooksEn
 
     public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();
 
+    public virtual ICollection<RemMethod> RemMethods { get; set; } = new List<RemMethod>();
+
     public virtual ICollection<Sentence> Sentences { get; set; } = new List<Sentence>();
 
     public virtual ICollection<Synonymou> Synonymous { get; set; } = new List<Synonymou>();
@@ -29,4 +31,6 @@ public partial class BooksEn
     public virtual ICollection<UserBook> UserBooks { get; set; } = new List<UserBook>();
 
     public virtual ICollection<UserVocabulary> UserVocabularies { get; set; } = new List<UserVocabulary>();
+
+    public virtual ICollection<Word> Words { get; set; } = new List<Word>();
 }
