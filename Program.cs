@@ -10,19 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-var connectionStr = String.Empty;
-if (builder.Environment.IsDevelopment())
-{
-    connectionStr = builder.Configuration.GetConnectionString("Dev");
-}
-else
-{
-    connectionStr = builder.Configuration.GetConnectionString("Pro");
-}
-
 builder.Services.AddDbContext<PuppylearnContext>(
     options =>
-    options.UseSqlServer(connectionStr));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PuppyLearn")));
 
 // AutoMapper register
 builder.Services.AddAutoMapper(typeof(UserProfiles));

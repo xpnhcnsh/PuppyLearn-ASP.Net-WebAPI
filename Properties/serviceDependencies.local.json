@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "ignored": "true",
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:Pro",
+      "dynamicId": null
+    }
+  }
+}
