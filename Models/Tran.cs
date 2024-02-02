@@ -16,4 +16,8 @@ public partial class Tran
     public string Pos { get; set; } = null!;
 
     public Guid BookId { get; set; }
+
+    public virtual BooksEn Book { get; set; } = null!;
+
+    public virtual Word Word { get; set; } = null!;
 }

@@ -16,4 +16,8 @@ public partial class Synonymou
     public string TransCn { get; set; } = null!;
 
     public string SynoEn { get; set; } = null!;
+
+    public virtual BooksEn Book { get; set; } = null!;
+
+    public virtual Word Word { get; set; } = null!;
 }

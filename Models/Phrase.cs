@@ -14,4 +14,8 @@ public partial class Phrase
     public string PhraseEn { get; set; } = null!;
 
     public string PhraseCn { get; set; } = null!;
+
+    public virtual BooksEn Book { get; set; } = null!;
+
+    public virtual Word Word { get; set; } = null!;
 }

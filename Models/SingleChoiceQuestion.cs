@@ -24,4 +24,8 @@ public partial class SingleChoiceQuestion
     public string? Choice3 { get; set; }
 
     public string? Choice4 { get; set; }
+
+    public virtual BooksEn Book { get; set; } = null!;
+
+    public virtual Word? Word { get; set; }
 }

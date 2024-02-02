@@ -13,7 +13,14 @@ public partial class Progress
 
     public Guid WordId { get; set; }
 
+    /// <summary>
+    /// 1：一天后复习；2：已背；3：3天后复习；7：7天后复习
+    /// </summary>
     public int Status { get; set; }
 
     public DateTime? LastUpdateTime { get; set; }
+
+    public virtual User User { get; set; } = null!;
+
+    public virtual Word Word { get; set; } = null!;
 }

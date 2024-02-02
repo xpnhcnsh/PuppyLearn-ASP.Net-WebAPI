@@ -26,4 +26,10 @@ public partial class User
     public string PasswordSalt { get; set; } = null!;
 
     public int? LastLedBookId { get; set; }
+
+    public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();
+
+    public virtual ICollection<UserCreatedVocabularyEn> UserCreatedVocabularyEns { get; set; } = new List<UserCreatedVocabularyEn>();
+
+    public virtual ICollection<UserVocabulary> UserVocabularies { get; set; } = new List<UserVocabulary>();
 }

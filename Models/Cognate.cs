@@ -16,4 +16,8 @@ public partial class Cognate
     public string CognateCn { get; set; } = null!;
 
     public string Pos { get; set; } = null!;
+
+    public virtual BooksEn Book { get; set; } = null!;
+
+    public virtual Word Word { get; set; } = null!;
 }

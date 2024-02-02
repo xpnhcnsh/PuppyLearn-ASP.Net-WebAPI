@@ -14,4 +14,8 @@ public partial class Sentence
     public string SentenceEn { get; set; } = null!;
 
     public string SentenceCn { get; set; } = null!;
+
+    public virtual BooksEn Book { get; set; } = null!;
+
+    public virtual Word Word { get; set; } = null!;
 }

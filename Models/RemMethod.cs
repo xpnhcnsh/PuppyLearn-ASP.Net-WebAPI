@@ -12,4 +12,8 @@ public partial class RemMethod
     public Guid BookId { get; set; }
 
     public string Method { get; set; } = null!;
+
+    public virtual BooksEn Book { get; set; } = null!;
+
+    public virtual Word Word { get; set; } = null!;
 }

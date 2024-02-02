@@ -14,4 +14,8 @@ public partial class UserCreatedVocabularyEn
     public DateTime CreateTime { get; set; }
 
     public DateTime? LastUpdateTime { get; set; }
+
+    public virtual User User { get; set; } = null!;
+
+    public virtual ICollection<UserVocabulary> UserVocabularies { get; set; } = new List<UserVocabulary>();
 }
