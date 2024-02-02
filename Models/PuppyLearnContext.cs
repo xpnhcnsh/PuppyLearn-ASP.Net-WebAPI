@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PuppyLearn.Models;
 
-public partial class PuppylearnContext : DbContext
+public partial class PuppyLearnContext : DbContext
 {
-    public PuppylearnContext()
+    public PuppyLearnContext()
     {
     }
 
-    public PuppylearnContext(DbContextOptions<PuppylearnContext> options)
+    public PuppyLearnContext(DbContextOptions<PuppyLearnContext> options)
         : base(options)
     {
     }
