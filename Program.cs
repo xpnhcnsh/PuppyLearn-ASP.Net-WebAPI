@@ -3,7 +3,6 @@ using PuppyLearn.Models;
 using PuppyLearn.Profiles;
 using PuppyLearn.Services;
 using PuppyLearn.Services.Interfaces;
-using PuppyLearn.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +20,7 @@ else
     connectionStr = builder.Configuration.GetConnectionString("Pro");
 }
 
-builder.Services.AddDbContext<PuppyLearnContext>(
+builder.Services.AddDbContext<PuppylearnContext>(
     options =>
     options.UseSqlServer(connectionStr));
 

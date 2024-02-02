@@ -9,9 +9,9 @@ namespace PuppyLearn.Services
 {
     public class UserService : IUserService
     {
-        private readonly PuppyLearnContext _context;
+        private readonly PuppylearnContext _context;
         private readonly IMapper _mapper;
-        public UserService(PuppyLearnContext context, IMapper mapper)
+        public UserService(PuppylearnContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;

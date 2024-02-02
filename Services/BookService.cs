@@ -8,9 +8,9 @@ namespace PuppyLearn.Services
 {
     public class BookService : IBookService
     {
-        private readonly PuppyLearnContext _context;
+        private readonly PuppylearnContext _context;
 
-        public BookService(PuppyLearnContext context)
+        public BookService(PuppylearnContext context)
         {
             _context = context;
         }
