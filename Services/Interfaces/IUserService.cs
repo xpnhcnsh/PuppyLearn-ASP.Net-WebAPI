@@ -7,8 +7,8 @@ namespace PuppyLearn.Services.Interfaces
 {
     public interface IUserService
     {
-        public  Task<ReturnValue> Register(RegisterDto registerDto, CancellationToken cancellationToken);
-        public  Task<ReturnValue> Login(LoginDto loginDto, CancellationToken cancellationToken);
+        public  Task<ReturnValue> RegisterAsync(RegisterDto registerDto, CancellationToken cancellationToken);
+        public  Task<ReturnValue> LoginAsync(LoginDto loginDto, CancellationToken cancellationToken);
     }
 
 }

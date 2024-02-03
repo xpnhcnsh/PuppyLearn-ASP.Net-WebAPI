@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PuppyLearn.Models.Dto;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
+using System.Net;
 
 namespace PuppyLearn.Controllers
 {
@@ -17,42 +18,19 @@ namespace PuppyLearn.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ReturnValue> Register([FromBody] RegisterDto registerDto, CancellationToken cancellationToken)
+        public async Task<ReturnValue> RegisterAsync([FromBody] RegisterDto registerDto, CancellationToken cancellationToken)
         {
-            try
-            {
-                var res = await _userService.Register(registerDto, cancellationToken);
-                return res;
-            }
-            catch(Exception ex)
-            {
-                return new ReturnValue
-                {
-                    Value = ex.Message,
-                    Msg = "error",
-                    HttpCode = 400
-                };
-            }
+            var res = await _userService.RegisterAsync(registerDto, cancellationToken);
+            return res;
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<ReturnValue> Login([FromBody] LoginDto loginDto, CancellationToken cancellation)
+        public async Task<ReturnValue> LoginAsync([FromBody] LoginDto loginDto, CancellationToken cancellation)
         {
-            try
-            {
-                var res = await _userService.Login(loginDto, cancellation);
-                return res;
-            }
-            catch(Exception ex)
-            {
-                return new ReturnValue
-                {
-                    Value = ex.Message,
-                    Msg = "error",
-                    HttpCode = 400
-                };
-            }
+            var res = await _userService.LoginAsync(loginDto, cancellation);
+            return res;
+            
         }
     }
 }

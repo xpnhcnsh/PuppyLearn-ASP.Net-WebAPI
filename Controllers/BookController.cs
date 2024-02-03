@@ -28,12 +28,10 @@ namespace PuppyLearn.Controllers
                 {
                     Value = null,
                     Msg = ex.Message,
-                    HttpCode = 400
+                    HttpCode = System.Net.HttpStatusCode.BadRequest
                 };
 
             }
-            
-            
         }
 
     }

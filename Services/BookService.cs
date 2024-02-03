@@ -274,7 +274,7 @@ namespace PuppyLearn.Services
                 return new ReturnValue
                 {
                     Value = url,
-                    HttpCode = 200,
+                    HttpCode = System.Net.HttpStatusCode.OK,
                     Msg = "迁移完毕"
                 };
 
@@ -284,7 +284,7 @@ namespace PuppyLearn.Services
                 return new ReturnValue
                 {
                     Value = null,
-                    HttpCode = 404,
+                    HttpCode = System.Net.HttpStatusCode.NotFound,
                     Msg = "文件夹不存在"
                 };
             }
