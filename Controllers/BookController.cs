@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
 
@@ -16,7 +15,8 @@ namespace PuppyLearn.Controllers
         }
 
         [HttpPost("AddbyUrl")]
-        public async Task<ReturnValue> AddbyUrl([FromQuery]string url)
+        [AuthorizeRoles(Roles.superAdmin)]
+        public async Task<ReturnValue> AddbyUrlAsync([FromQuery]string url)
         {
             try
             {
@@ -36,8 +36,8 @@ namespace PuppyLearn.Controllers
         }
 
         [HttpGet("GetBookList")]
-        [Authorize(Roles ="superAdmin")]
-        public async Task<ReturnValue> GetBookList(CancellationToken cancellationToken)
+        [AuthorizeRoles(Roles.admin,Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
+        public async Task<ReturnValue> GetBookListAsync(CancellationToken cancellationToken)
         {
             var res = await _bookService.GetBookList(cancellationToken);
             return res;

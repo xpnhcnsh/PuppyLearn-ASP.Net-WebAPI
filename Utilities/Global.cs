@@ -1,4 +1,6 @@
-﻿namespace PuppyLearn.Utilities
+﻿using System.Runtime.CompilerServices;
+
+namespace PuppyLearn.Utilities
 {
     public static class Global
     {
@@ -6,25 +8,25 @@
         {
             if (index == 1)
             {
-                return "normalUser";
+                return Roles.normalUser;
             }
-            else if(index == 2){
-                return "vip";
+            else if (index == 2) {
+                return Roles.vip;
             }
-            else if(index == 3)
+            else if (index == 3)
             {
-                return "teacher";
+                return Roles.teacher;
             }
-            else if(index == 4)
+            else if (index == 4)
             {
-                return "admin";
+                return Roles.admin;
             }
             else
             {
-                return "superAdmin";
+                return Roles.superAdmin;
             }
         }
-            
-        
     }
+
+    
 }

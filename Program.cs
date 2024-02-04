@@ -43,8 +43,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 ValidateLifetime = true,
                 // jwt默认对设置的expiretime会给一个offside，这里将offside置零，否则设置的expiretime会不按照期望生效。
                 ClockSkew = TimeSpan.Zero,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
-            };
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
+        };
         });
 
 
@@ -52,11 +52,10 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
-
+app.UseCookiePolicy();
 app.UseAuthentication();
 
 app.UseAuthorization();
-
 
 app.MapControllers();
 
