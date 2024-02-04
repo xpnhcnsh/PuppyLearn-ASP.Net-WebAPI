@@ -11,5 +11,7 @@ namespace PuppyLearn.Services.Interfaces
         /// <param name="url"></param>
         /// <returns></returns>
         public Task<ReturnValue> AddbyFolderUrl(string url);
+
+        public Task<ReturnValue> GetBookList(CancellationToken cancellationToken);
     }
 }

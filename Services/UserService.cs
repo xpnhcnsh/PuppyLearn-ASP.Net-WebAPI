@@ -12,12 +12,10 @@ namespace PuppyLearn.Services
     {
         private readonly PuppylearnContext _context;
         private readonly IMapper _mapper;
-        private readonly IConfiguration _config;
-        public UserService(PuppylearnContext context, IMapper mapper, IConfiguration configuration)
+        public UserService(PuppylearnContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _config = configuration;
         }
 
 
@@ -50,7 +48,12 @@ namespace PuppyLearn.Services
                 else
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    return new ReturnValue();
+                    return new ReturnValue {
+                        Value = registerDto,
+                        Msg = "用户取消注册",
+                        HttpCode = HttpStatusCode.BadRequest
+                    }
+                    ;
                 }
             }
             catch (OperationCanceledException ex)
@@ -89,8 +92,7 @@ namespace PuppyLearn.Services
                             HttpCode = HttpStatusCode.BadRequest
                         };
                     }
-                    // TBD:JWT token generation
-                    // TBD:Creat a table Roles
+         
                     var flag = Hasher.VerifyPassword(loginDto.Password, user.PasswordHash, Convert.FromBase64String(user.PasswordSalt));
                     if (!flag)
                     {
@@ -111,7 +113,11 @@ namespace PuppyLearn.Services
                 else
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    return new ReturnValue();
+                    return new ReturnValue {
+                        Value = loginDto,
+                        Msg = "用户取消登录",
+                        HttpCode = HttpStatusCode.BadRequest
+                    };
                 }
             }
             catch (OperationCanceledException ex)

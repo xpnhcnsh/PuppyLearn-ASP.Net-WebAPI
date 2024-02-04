@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
 
@@ -32,6 +33,14 @@ namespace PuppyLearn.Controllers
                 };
 
             }
+        }
+
+        [HttpGet("GetBookList")]
+        [Authorize(Roles ="superAdmin")]
+        public async Task<ReturnValue> GetBookList(CancellationToken cancellationToken)
+        {
+            var res = await _bookService.GetBookList(cancellationToken);
+            return res;
         }
 
     }

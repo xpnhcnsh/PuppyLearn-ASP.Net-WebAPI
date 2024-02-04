@@ -3,6 +3,8 @@ using Newtonsoft.Json;
 using PuppyLearn.Models;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
+using System.Linq.Expressions;
+using System.Net;
 
 namespace PuppyLearn.Services
 {
@@ -288,6 +290,52 @@ namespace PuppyLearn.Services
                     Msg = "文件夹不存在"
                 };
             }
+        }
+
+        public async Task<ReturnValue> GetBookList(CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    var res =await _context.BooksEns.AsNoTracking().ToListAsync();
+                    return new ReturnValue
+                    {
+                        Value = res,
+                        Msg = "查询成功，返回结果",
+                        HttpCode = HttpStatusCode.OK
+                    };
+                }
+                else
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return new ReturnValue
+                    {
+                        Value = null,
+                        Msg = "用户取消GetBookList",
+                        HttpCode = HttpStatusCode.BadRequest
+                    };
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                return new ReturnValue
+                {
+                    Value = ex.Message,
+                    Msg = "用户取消GetBookList",
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+            catch(Exception ex)
+            {
+                return new ReturnValue
+                {
+                    Value = ex.Message,
+                    Msg = "error",
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+            
         }
     }
 }
