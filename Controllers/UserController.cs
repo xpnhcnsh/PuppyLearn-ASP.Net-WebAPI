@@ -64,7 +64,6 @@ namespace PuppyLearn.Controllers
                 res.Msg = token;
             }
             return res;
-            
         }
     }
 }
