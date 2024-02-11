@@ -81,7 +81,7 @@ namespace PuppyLearn.Services
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => (x.UserName == loginDto.UserName) | (x.Email == loginDto.Email), cancellationToken);
+                    var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Email == loginDto.Email, cancellationToken);
 
                     if (user == null)
                     {
