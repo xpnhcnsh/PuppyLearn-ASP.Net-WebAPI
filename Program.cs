@@ -19,6 +19,7 @@ builder.Services.AddDbContext<PuppylearnContext>(
 
 // AutoMapper register
 builder.Services.AddAutoMapper(typeof(UserProfiles));
+builder.Services.AddAutoMapper(typeof(BookProfiles));
 
 // Service register
 builder.Services.AddScoped<IUserService, UserService>();

@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PuppyLearn.Models;
+using PuppyLearn.Models.Dto;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
 using System.Linq.Expressions;
@@ -11,10 +13,12 @@ namespace PuppyLearn.Services
     public class BookService : IBookService
     {
         private readonly PuppylearnContext _context;
+        private readonly IMapper _mapper;
 
-        public BookService(PuppylearnContext context)
+        public BookService(PuppylearnContext context, IMapper mapper )
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<ReturnValue> AddbyFolderUrl(string url)
@@ -301,7 +305,7 @@ namespace PuppyLearn.Services
                     var res =await _context.BooksEns.AsNoTracking().ToListAsync();
                     return new ReturnValue
                     {
-                        Value = res,
+                        Value = _mapper.Map<List<BookDto>>(res),
                         Msg = "查询成功，返回结果",
                         HttpCode = HttpStatusCode.OK
                     };

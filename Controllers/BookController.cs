@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PuppyLearn.Models.Dto;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
 
