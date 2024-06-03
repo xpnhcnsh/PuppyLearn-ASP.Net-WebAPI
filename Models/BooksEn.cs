@@ -11,6 +11,8 @@ public partial class BooksEn
 
     public int? WordsCount { get; set; }
 
+    public string? BookNameCh { get; set; }
+
     public virtual ICollection<Cognate> Cognates { get; set; } = new List<Cognate>();
 
     public virtual ICollection<Phrase> Phrases { get; set; } = new List<Phrase>();

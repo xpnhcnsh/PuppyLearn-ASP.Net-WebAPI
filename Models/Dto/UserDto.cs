@@ -11,7 +11,7 @@
         public DateTime? LastLoginTime { get; set; }
 
         /// <summary>
-        /// 1：普通用户；2：vip用户；3：admin；4：superAdmin
+        /// 1：普通用户；2：vip用户；3：teacher；4：admin;5：superAdmin
         /// </summary>
         public int AccountTypeId { get; set; }
 

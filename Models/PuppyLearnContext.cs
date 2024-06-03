@@ -46,6 +46,7 @@ public partial class PuppylearnContext : DbContext
     public virtual DbSet<Word> Words { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.UseCollation("Chinese_PRC_CI_AS");
@@ -54,10 +55,12 @@ public partial class PuppylearnContext : DbContext
         {
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
+                .HasComment("1:normalUser;2:vip;3:teacher;4:admin;5:superAdmin")
                 .HasColumnName("id");
             entity.Property(e => e.AccountName)
                 .HasMaxLength(10)
                 .IsFixedLength()
+                .HasComment("1:normalUser;2:vip;3:teacher;4:admin;5:superAdmin")
                 .HasColumnName("accountName");
         });
 
@@ -71,6 +74,9 @@ public partial class PuppylearnContext : DbContext
             entity.Property(e => e.BookName)
                 .HasMaxLength(50)
                 .HasColumnName("bookName");
+            entity.Property(e => e.BookNameCh)
+                .HasMaxLength(50)
+                .HasColumnName("bookNameCh");
             entity.Property(e => e.WordsCount).HasColumnName("wordsCount");
         });
 
@@ -292,7 +298,9 @@ public partial class PuppylearnContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
-            entity.Property(e => e.AccountTypeId).HasColumnName("accountTypeId");
+            entity.Property(e => e.AccountTypeId)
+                .HasComment("1:normalUser;2:vip;3:teacher;4:admin;5:superAdmin")
+                .HasColumnName("accountTypeId");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .HasColumnName("email");

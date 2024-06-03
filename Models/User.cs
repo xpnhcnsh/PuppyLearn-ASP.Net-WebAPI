@@ -15,6 +15,9 @@ public partial class User
 
     public string PasswordHash { get; set; } = null!;
 
+    /// <summary>
+    /// 1:normalUser;2:vip;3:teacher;4:admin;5:superAdmin
+    /// </summary>
     public int AccountTypeId { get; set; }
 
     public bool IsSuspend { get; set; }
