@@ -6,6 +6,6 @@
         public string BookName { get; set; } = null!;
         public int? WordsCount { get; set; }
         public string? BookNameCh { get; set; }
-        public string? Catalog {  get; set; }
+        public string? Catalog { get; set; }
     }
 }
