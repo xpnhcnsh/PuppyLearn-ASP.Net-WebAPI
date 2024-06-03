@@ -77,6 +77,10 @@ public partial class PuppylearnContext : DbContext
             entity.Property(e => e.BookNameCh)
                 .HasMaxLength(50)
                 .HasColumnName("bookNameCh");
+            entity.Property(e => e.Catalog)
+                .HasMaxLength(10)
+                .IsFixedLength()
+                .HasColumnName("catalog");
             entity.Property(e => e.WordsCount).HasColumnName("wordsCount");
         });
 

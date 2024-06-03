@@ -13,6 +13,8 @@ public partial class BooksEn
 
     public string? BookNameCh { get; set; }
 
+    public string? Catalog { get; set; }
+
     public virtual ICollection<Cognate> Cognates { get; set; } = new List<Cognate>();
 
     public virtual ICollection<Phrase> Phrases { get; set; } = new List<Phrase>();
