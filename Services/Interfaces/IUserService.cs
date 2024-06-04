@@ -10,6 +10,7 @@ namespace PuppyLearn.Services.Interfaces
         public  Task<ReturnValue> RegisterAsync(RegisterDto registerDto, CancellationToken cancellationToken);
         public  Task<ReturnValue> LoginAsync(LoginDto loginDto, CancellationToken cancellationToken);
         public Task<ReturnValue> AddNewBooksAsync(Guid userId, List<BookDto> bookDtoList, CancellationToken cancellationToken);
+        public Task<ReturnValue> GetUserBooksAsync(Guid userId, CancellationToken cancellationToken);
     }
 
 }

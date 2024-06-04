@@ -12,10 +12,12 @@ namespace PuppyLearn.Services
     {
         private readonly PuppylearnContext _context;
         private readonly IMapper _mapper;
-        public UserService(PuppylearnContext context, IMapper mapper)
+        private readonly IBookService _bookService;
+        public UserService(PuppylearnContext context, IMapper mapper, IBookService bookService)
         {
             _context = context;
             _mapper = mapper;
+            _bookService = bookService;
         }
 
 
@@ -146,32 +148,99 @@ namespace PuppyLearn.Services
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    var bookIdList = bookDtoList.Select(x=>x.Id).ToList();
-                    var duplicateEntries = _context.UserBooks.Where(x => (x.Id == userId) && bookIdList.Contains(x.BookId)).Select(x=>x.BookId).ToList();
-                    var tobeAddedBookIdList = bookIdList.Except(duplicateEntries).ToList();
-                    List<UserBook> newEntries = new List<UserBook>();
-                    foreach (var bookId in tobeAddedBookIdList)
+                    var bookIdList = bookDtoList.Select(x=>x.Id);
+                    var duplicateBookIds = _context.UserBooks.Where(x => (x.UserId == userId && x.Finished==false)).Select(x=>x.BookId).ToList().Intersect(bookIdList);
+                    var tobeAddedBookIdList = bookIdList.Except(duplicateBookIds).ToList();
+                    if(tobeAddedBookIdList.Count > 0)
                     {
-                        UserBook newBook = new UserBook()
+                        List<UserBook> newEntries = new List<UserBook>();
+                        foreach (Guid bookId in tobeAddedBookIdList)
                         {
-                            UserId = userId,
-                            BookId = bookId,
-                            Finished = false,
-                            StartDateTime = DateTime.Now,
-                            WordsPerday = 0,
-                            RepeatTimes = 0,
-                            LastUpdateTime = DateTime.Now,
-                            Id = Guid.NewGuid(),
+                            var userBookFromDb = await _bookService.GetUserBookById(bookId, userId, cancellationToken);
+                            if (userBookFromDb.Value != null)
+                            {
+                                userBookFromDb.Value[0].Finished = false;
+                                userBookFromDb.Value[0].StartDateTime = DateTime.Now;
+                            }
+                            else
+                            {
+                                UserBook newBook = new UserBook()
+                                {
+                                    UserId = userId,
+                                    BookId = bookId,
+                                    Finished = false,
+                                    StartDateTime = DateTime.Now,
+                                    WordsPerday = 0,
+                                    RepeatTimes = 0,
+                                    LastUpdateTime = DateTime.Now,
+                                    Id = Guid.NewGuid(),
+                                };
+                                newEntries.Add(newBook);
+                            }
+                        }
+                        await _context.UserBooks.AddRangeAsync(newEntries);
+                        _context.SaveChanges();
+                        return new ReturnValue
+                        {
+                            Value = newEntries,
+                            Msg = "成功添加",
+                            HttpCode = HttpStatusCode.OK,
                         };
-                        newEntries.Add(newBook);
                     }
-                    await _context.UserBooks.AddRangeAsync(newEntries);
-                    _context.SaveChanges();
+                    else
+                    {
+                        return new ReturnValue
+                        {
+                            Value = userId,
+                            Msg = "请勿重复添加",
+                            HttpCode = HttpStatusCode.BadRequest
+                        };
+                    }
+                    
+                }
+                else
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
                     return new ReturnValue
                     {
-                        Value = newEntries,
-                        Msg = "成功添加books",
+                        Value = userId,
+                        Msg = "用户取消操作",
+                        HttpCode = HttpStatusCode.BadRequest
+                    };
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                return new ReturnValue
+                {
+                    Value = userId,
+                    Msg = ex.Message,
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ReturnValue
+                {
+                    Value = userId,
+                    Msg = ex.Message,
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+        }
+
+        public async Task<ReturnValue> GetUserBooksAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    var res = await _context.UserBooks.Where(x=>x.UserId == userId).ToListAsync();
+                    return new ReturnValue
+                    {
+                        Msg = "返回该用户当前所选books",
                         HttpCode = HttpStatusCode.OK,
+                        Value = res
                     };
                 }
                 else

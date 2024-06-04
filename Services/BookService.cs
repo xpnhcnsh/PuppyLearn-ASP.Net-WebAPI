@@ -5,7 +5,6 @@ using PuppyLearn.Models;
 using PuppyLearn.Models.Dto;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
-using System.Linq.Expressions;
 using System.Net;
 
 namespace PuppyLearn.Services
@@ -340,6 +339,51 @@ namespace PuppyLearn.Services
                 };
             }
             
+        }
+
+        public async Task<ReturnValue> GetUserBookById(Guid bookId,Guid userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    var res = await _context.UserBooks.Where(x=>x.BookId==bookId && x.UserId==userId).ToListAsync();
+                    return new ReturnValue
+                    {
+                        Value = res,
+                        Msg = "查询成功，返回结果",
+                        HttpCode = HttpStatusCode.OK
+                    };
+                }
+                else
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return new ReturnValue
+                    {
+                        Value = null,
+                        Msg = "用户取消GetUserBookById",
+                        HttpCode = HttpStatusCode.BadRequest
+                    };
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                return new ReturnValue
+                {
+                    Value = ex.Message,
+                    Msg = "用户取消用户取消GetUserBookById",
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ReturnValue
+                {
+                    Value = ex.Message,
+                    Msg = "error",
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
         }
     }
 }

@@ -72,5 +72,12 @@ namespace PuppyLearn.Controllers
             var res = await _userService.AddNewBooksAsync(userId, bookDtoList, cancellationToken);
             return res;
         }
+
+        [HttpPost("userBook/{userId}")]
+        public  async Task<ReturnValue> GetUserBook([FromRoute]Guid userId, CancellationToken cancellationToken)
+        {
+            var res = await _userService.GetUserBooksAsync(userId, cancellationToken);
+            return res;
+        }
     }
 }
