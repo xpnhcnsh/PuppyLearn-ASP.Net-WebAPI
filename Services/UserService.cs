@@ -161,6 +161,7 @@ namespace PuppyLearn.Services
                             WordsPerday = 0,
                             RepeatTimes = 0,
                             LastUpdateTime = DateTime.Now,
+                            Id = Guid.NewGuid(),
                         };
                         newEntries.Add(newBook);
                     }
