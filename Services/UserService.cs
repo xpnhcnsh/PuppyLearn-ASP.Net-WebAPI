@@ -235,7 +235,7 @@ namespace PuppyLearn.Services
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    var res = await _context.UserBooks.Where(x=>x.UserId == userId).ToListAsync();
+                    var res = await _context.UserBooks.Include(x=>x.Book).Where(x=>x.UserId == userId).ToListAsync();
                     return new ReturnValue
                     {
                         Value = res,
