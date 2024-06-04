@@ -65,5 +65,12 @@ namespace PuppyLearn.Controllers
             }
             return res;
         }
+
+        [HttpPost("addBooks")]
+        public async Task<ReturnValue> AddNewBooks(UserDto userDto, List<BookDto> bookDtoList, CancellationToken cancellationToken)
+        {
+            var res = await _userService.AddNewBooks(userDto, bookDtoList, cancellationToken);
+            return res;
+        }
     }
 }
