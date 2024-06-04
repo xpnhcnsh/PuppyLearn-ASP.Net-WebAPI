@@ -66,10 +66,10 @@ namespace PuppyLearn.Controllers
             return res;
         }
 
-        [HttpPost("addBooks")]
-        public async Task<ReturnValue> AddNewBooks(UserDto userDto, List<BookDto> bookDtoList, CancellationToken cancellationToken)
+        [HttpPost("addBooks/{userId}")]
+        public async Task<ReturnValue> AddNewBooksAsync([FromRoute]Guid userId, [FromBody]List<BookDto> bookDtoList, CancellationToken cancellationToken)
         {
-            var res = await _userService.AddNewBooks(userDto, bookDtoList, cancellationToken);
+            var res = await _userService.AddNewBooksAsync(userId, bookDtoList, cancellationToken);
             return res;
         }
     }
