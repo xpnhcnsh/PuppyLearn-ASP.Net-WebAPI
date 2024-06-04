@@ -238,9 +238,9 @@ namespace PuppyLearn.Services
                     var res = await _context.UserBooks.Where(x=>x.UserId == userId).ToListAsync();
                     return new ReturnValue
                     {
+                        Value = res,
                         Msg = "返回该用户当前所选books",
                         HttpCode = HttpStatusCode.OK,
-                        Value = res
                     };
                 }
                 else

@@ -22,4 +22,6 @@ public partial class UserBook
     public DateTime? LastUpdateTime { get; set; }
 
     public virtual BooksEn Book { get; set; } = null!;
+
+    public virtual User User { get; set; } = null!;
 }

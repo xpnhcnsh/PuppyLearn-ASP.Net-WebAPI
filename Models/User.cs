@@ -30,7 +30,11 @@ public partial class User
 
     public int? LastLedBookId { get; set; }
 
+    public virtual AccountType AccountType { get; set; } = null!;
+
     public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();
+
+    public virtual ICollection<UserBook> UserBooks { get; set; } = new List<UserBook>();
 
     public virtual ICollection<UserCreatedVocabularyEn> UserCreatedVocabularyEns { get; set; } = new List<UserCreatedVocabularyEn>();
 

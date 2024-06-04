@@ -17,7 +17,7 @@ public partial class UserVocabulary
 
     public DateTime AddTime { get; set; }
 
-    public virtual BooksEn IdNavigation { get; set; } = null!;
+    public virtual BooksEn Book { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
 

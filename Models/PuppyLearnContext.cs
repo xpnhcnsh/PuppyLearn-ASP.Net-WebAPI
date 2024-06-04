@@ -79,7 +79,6 @@ public partial class PuppylearnContext : DbContext
                 .HasColumnName("bookNameCh");
             entity.Property(e => e.Catalog)
                 .HasMaxLength(10)
-                .IsFixedLength()
                 .HasColumnName("catalog");
             entity.Property(e => e.WordsCount).HasColumnName("wordsCount");
         });
@@ -149,6 +148,11 @@ public partial class PuppylearnContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.WordId).HasColumnName("wordId");
+
+            entity.HasOne(d => d.Book).WithMany(p => p.Progresses)
+                .HasForeignKey(d => d.BookId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Progress_Books_en");
 
             entity.HasOne(d => d.User).WithMany(p => p.Progresses)
                 .HasForeignKey(d => d.UserId)
@@ -330,6 +334,11 @@ public partial class PuppylearnContext : DbContext
             entity.Property(e => e.UserName)
                 .HasMaxLength(50)
                 .HasColumnName("userName");
+
+            entity.HasOne(d => d.AccountType).WithMany(p => p.Users)
+                .HasForeignKey(d => d.AccountTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Users_AccountTypes");
         });
 
         modelBuilder.Entity<UserBook>(entity =>
@@ -355,6 +364,11 @@ public partial class PuppylearnContext : DbContext
                 .HasForeignKey(d => d.BookId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Book_Books_en");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserBooks)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_User_Book_Users");
         });
 
         modelBuilder.Entity<UserCreatedVocabularyEn>(entity =>
@@ -396,8 +410,8 @@ public partial class PuppylearnContext : DbContext
             entity.Property(e => e.VocabularyId).HasColumnName("vocabularyId");
             entity.Property(e => e.WordId).HasColumnName("wordId");
 
-            entity.HasOne(d => d.IdNavigation).WithOne(p => p.UserVocabulary)
-                .HasForeignKey<UserVocabulary>(d => d.Id)
+            entity.HasOne(d => d.Book).WithMany(p => p.UserVocabularies)
+                .HasForeignKey(d => d.BookId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Vocabulary_Books_en");
 

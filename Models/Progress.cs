@@ -20,6 +20,8 @@ public partial class Progress
 
     public DateTime? LastUpdateTime { get; set; }
 
+    public virtual BooksEn Book { get; set; } = null!;
+
     public virtual User User { get; set; } = null!;
 
     public virtual Word Word { get; set; } = null!;
