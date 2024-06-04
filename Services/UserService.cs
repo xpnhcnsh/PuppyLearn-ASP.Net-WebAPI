@@ -139,5 +139,69 @@ namespace PuppyLearn.Services
                 };
             }
         }
+
+        public async Task<ReturnValue> AddNewBooks(UserDto userDto, List<BookDto> bookDtoList, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    var bookIdList = bookDtoList.Select(x=>x.Id).ToList();
+                    var duplicateEntries = _context.UserBooks.Where(x => (x.Id == userDto.Id) && bookIdList.Contains(x.BookId)).Select(x=>x.BookId).ToList();
+                    var tobeAddedBookIdList = bookIdList.Except(duplicateEntries).ToList();
+                    List<UserBook> newEntries = new List<UserBook>();
+                    foreach (var bookId in tobeAddedBookIdList)
+                    {
+                        UserBook newBook = new UserBook()
+                        {
+                            UserId = userDto.Id,
+                            BookId = bookId,
+                            Finished = false,
+                            StartDateTime = DateTime.Now,
+                            WordsPerday = 0,
+                            RepeatTimes = 0,
+                            LastUpdateTime = DateTime.Now,
+                        };
+                        newEntries.Add(newBook);
+                    }
+                    await _context.UserBooks.AddRangeAsync(newEntries);
+                    _context.SaveChanges();
+                    return new ReturnValue
+                    {
+                        Value = newEntries,
+                        Msg = "成功添加books",
+                        HttpCode = HttpStatusCode.OK,
+                    };
+                }
+                else
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return new ReturnValue
+                    {
+                        Value = userDto,
+                        Msg = "用户取消操作",
+                        HttpCode = HttpStatusCode.BadRequest
+                    };
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                return new ReturnValue
+                {
+                    Value = userDto,
+                    Msg = ex.Message,
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ReturnValue
+                {
+                    Value = userDto,
+                    Msg = ex.Message,
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+        }
     }
 }
