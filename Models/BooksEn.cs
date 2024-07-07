@@ -9,6 +9,9 @@ public partial class BooksEn
 
     public string BookName { get; set; } = null!;
 
+    /// <summary>
+    /// 共有多少单词
+    /// </summary>
     public int? WordsCount { get; set; }
 
     public string? BookNameCh { get; set; }
@@ -24,8 +27,6 @@ public partial class BooksEn
     public virtual ICollection<RemMethod> RemMethods { get; set; } = new List<RemMethod>();
 
     public virtual ICollection<Sentence> Sentences { get; set; } = new List<Sentence>();
-
-    public virtual ICollection<SingleChoiceQuestion> SingleChoiceQuestions { get; set; } = new List<SingleChoiceQuestion>();
 
     public virtual ICollection<Synonymou> Synonymous { get; set; } = new List<Synonymou>();
 

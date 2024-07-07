@@ -21,6 +21,8 @@
 
         public string Email { get; set; } = null!;
 
+        public string Settings { get; set; } = null!;
+
         /// <summary>
         /// 上一次学习的BookId
         /// </summary>

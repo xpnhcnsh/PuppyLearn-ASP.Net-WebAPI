@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PuppyLearn.Models;
 
-public partial class PuppylearnContext : DbContext
+public partial class PuppyLearnContext : DbContext
 {
-    public PuppylearnContext()
+    public PuppyLearnContext()
     {
     }
 
-    public PuppylearnContext(DbContextOptions<PuppylearnContext> options)
+    public PuppyLearnContext(DbContextOptions<PuppyLearnContext> options)
         : base(options)
     {
     }
@@ -49,38 +49,42 @@ public partial class PuppylearnContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.UseCollation("Chinese_PRC_CI_AS");
-
         modelBuilder.Entity<AccountType>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK_accountType");
+
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
-                .HasComment("1:normalUser;2:vip;3:teacher;4:admin;5:superAdmin")
                 .HasColumnName("id");
             entity.Property(e => e.AccountName)
                 .HasMaxLength(10)
                 .IsFixedLength()
-                .HasComment("1:normalUser;2:vip;3:teacher;4:admin;5:superAdmin")
                 .HasColumnName("accountName");
         });
 
         modelBuilder.Entity<BooksEn>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK_Books_en_1");
+
             entity.ToTable("Books_en");
+
+            entity.HasIndex(e => e.BookName, "IX_Books_en").IsUnique();
 
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.BookName)
-                .HasMaxLength(50)
+                .HasMaxLength(20)
                 .HasColumnName("bookName");
             entity.Property(e => e.BookNameCh)
-                .HasMaxLength(50)
+                .HasMaxLength(20)
                 .HasColumnName("bookNameCh");
             entity.Property(e => e.Catalog)
                 .HasMaxLength(10)
                 .HasColumnName("catalog");
-            entity.Property(e => e.WordsCount).HasColumnName("wordsCount");
+            entity.Property(e => e.WordsCount)
+                .HasComment("共有多少单词")
+                .HasColumnName("wordsCount");
         });
 
         modelBuilder.Entity<Cognate>(entity =>
@@ -91,12 +95,17 @@ public partial class PuppylearnContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.BookId).HasColumnName("bookId");
-            entity.Property(e => e.CognateCn).HasColumnName("cognate_cn");
-            entity.Property(e => e.CognateEn).HasColumnName("cognate_en");
+            entity.Property(e => e.CognateCn)
+                .HasComment("同根词中文")
+                .HasColumnName("cognate_cn");
+            entity.Property(e => e.CognateEn)
+                .HasComment("同根词英文")
+                .HasColumnName("cognate_en");
             entity.Property(e => e.Pos)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .IsFixedLength()
+                .HasComment("词性")
                 .HasColumnName("pos");
             entity.Property(e => e.WordId).HasColumnName("wordId");
 
@@ -116,9 +125,15 @@ public partial class PuppylearnContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
-            entity.Property(e => e.BookId).HasColumnName("bookId");
-            entity.Property(e => e.PhraseCn).HasColumnName("phrase_cn");
-            entity.Property(e => e.PhraseEn).HasColumnName("phrase_en");
+            entity.Property(e => e.BookId)
+                .HasComment("来自哪个单词书")
+                .HasColumnName("bookId");
+            entity.Property(e => e.PhraseCn)
+                .HasComment("短语中文")
+                .HasColumnName("phrase_cn");
+            entity.Property(e => e.PhraseEn)
+                .HasComment("英文短语")
+                .HasColumnName("phrase_en");
             entity.Property(e => e.WordId).HasColumnName("wordId");
 
             entity.HasOne(d => d.Book).WithMany(p => p.Phrases)
@@ -141,10 +156,10 @@ public partial class PuppylearnContext : DbContext
                 .HasColumnName("id");
             entity.Property(e => e.BookId).HasColumnName("bookId");
             entity.Property(e => e.LastUpdateTime)
-                .HasColumnType("smalldatetime")
+                .HasColumnType("datetime")
                 .HasColumnName("lastUpdateTime");
             entity.Property(e => e.Status)
-                .HasComment("1：一天后复习；2：已背；3：3天后复习；7：7天后复习")
+                .HasComment("1:1级；2:2级；3:3级（等级越高，表示本单词背错的次数越多，每次生成背诵List时，从3级选择较最多单词，2级选择中等个数单词，从1级选择最少的单词；如果背刺背错，则升级，反之降级；最高3级，当为0级时，从Progress表里删除本条目。）")
                 .HasColumnName("status");
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.WordId).HasColumnName("wordId");
@@ -153,11 +168,6 @@ public partial class PuppylearnContext : DbContext
                 .HasForeignKey(d => d.BookId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Progress_Books_en");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Progresses)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Progress_Users");
 
             entity.HasOne(d => d.Word).WithMany(p => p.Progresses)
                 .HasForeignKey(d => d.WordId)
@@ -173,7 +183,9 @@ public partial class PuppylearnContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.BookId).HasColumnName("bookId");
-            entity.Property(e => e.Method).HasColumnName("method");
+            entity.Property(e => e.Method)
+                .HasComment("记忆方法")
+                .HasColumnName("method");
             entity.Property(e => e.WordId).HasColumnName("wordId");
 
             entity.HasOne(d => d.Book).WithMany(p => p.RemMethods)
@@ -192,14 +204,20 @@ public partial class PuppylearnContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
-            entity.Property(e => e.BookId).HasColumnName("bookId");
+            entity.Property(e => e.BookId)
+                .HasComment("书本Id")
+                .HasColumnName("bookId");
             entity.Property(e => e.SentenceCn)
+                .HasComment("例句中文")
                 .HasColumnType("ntext")
                 .HasColumnName("sentence_cn");
             entity.Property(e => e.SentenceEn)
+                .HasComment("例句英文")
                 .HasColumnType("ntext")
                 .HasColumnName("sentence_en");
-            entity.Property(e => e.WordId).HasColumnName("wordId");
+            entity.Property(e => e.WordId)
+                .HasComment("单词Id")
+                .HasColumnName("wordId");
 
             entity.HasOne(d => d.Book).WithMany(p => p.Sentences)
                 .HasForeignKey(d => d.BookId)
@@ -214,14 +232,21 @@ public partial class PuppylearnContext : DbContext
 
         modelBuilder.Entity<SingleChoiceQuestion>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK_Exam");
+
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.AnsExplainCn)
+                .HasComment("答案中文解释")
                 .HasColumnType("ntext")
                 .HasColumnName("ansExplain_cn");
-            entity.Property(e => e.AnswerIndex).HasColumnName("answerIndex");
-            entity.Property(e => e.BookId).HasColumnName("bookId");
+            entity.Property(e => e.AnswerIndex)
+                .HasComment("答案index：1；2；3；4")
+                .HasColumnName("answerIndex");
+            entity.Property(e => e.BookId)
+                .HasComment("该题属于某本书")
+                .HasColumnName("bookId");
             entity.Property(e => e.Choice1)
                 .HasMaxLength(50)
                 .HasColumnName("choice1");
@@ -235,14 +260,12 @@ public partial class PuppylearnContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("choice4");
             entity.Property(e => e.QuestionEn)
+                .HasComment("英文问题")
                 .HasColumnType("ntext")
                 .HasColumnName("question_en");
-            entity.Property(e => e.WordId).HasColumnName("wordId");
-
-            entity.HasOne(d => d.Book).WithMany(p => p.SingleChoiceQuestions)
-                .HasForeignKey(d => d.BookId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SingleChoiceQuestions_Books_en");
+            entity.Property(e => e.WordId)
+                .HasComment("和这道题相关的单词")
+                .HasColumnName("wordId");
 
             entity.HasOne(d => d.Word).WithMany(p => p.SingleChoiceQuestions)
                 .HasForeignKey(d => d.WordId)
@@ -254,15 +277,24 @@ public partial class PuppylearnContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
-            entity.Property(e => e.BookId).HasColumnName("bookId");
+            entity.Property(e => e.BookId)
+                .HasComment("书本Id")
+                .HasColumnName("bookId");
             entity.Property(e => e.Pos)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .IsFixedLength()
+                .HasComment("词性")
                 .HasColumnName("pos");
-            entity.Property(e => e.SynoEn).HasColumnName("syno_en");
-            entity.Property(e => e.TransCn).HasColumnName("trans_cn");
-            entity.Property(e => e.WordId).HasColumnName("wordId");
+            entity.Property(e => e.SynoEn)
+                .HasComment("同义词（组）")
+                .HasColumnName("syno_en");
+            entity.Property(e => e.TransCn)
+                .HasComment("中文翻译")
+                .HasColumnName("trans_cn");
+            entity.Property(e => e.WordId)
+                .HasComment("单词Id")
+                .HasColumnName("wordId");
 
             entity.HasOne(d => d.Book).WithMany(p => p.Synonymous)
                 .HasForeignKey(d => d.BookId)
@@ -285,9 +317,14 @@ public partial class PuppylearnContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .IsFixedLength()
+                .HasComment("词性")
                 .HasColumnName("pos");
-            entity.Property(e => e.TransCn).HasColumnName("trans_cn");
-            entity.Property(e => e.TransEn).HasColumnName("trans_en");
+            entity.Property(e => e.TransCn)
+                .HasComment("中释")
+                .HasColumnName("trans_cn");
+            entity.Property(e => e.TransEn)
+                .HasComment("英释")
+                .HasColumnName("trans_en");
             entity.Property(e => e.WordId).HasColumnName("wordId");
 
             entity.HasOne(d => d.Book).WithMany(p => p.Trans)
@@ -303,20 +340,28 @@ public partial class PuppylearnContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
+            entity.HasIndex(e => e.UserName, "IX_Users").IsUnique();
+
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.AccountTypeId)
-                .HasComment("1:normalUser;2:vip;3:teacher;4:admin;5:superAdmin")
+                .HasComment("1：普通用户；2：vip用户；3：admin；4：superAdmin")
                 .HasColumnName("accountTypeId");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .HasColumnName("email");
-            entity.Property(e => e.IsSuspend).HasColumnName("isSuspend");
-            entity.Property(e => e.IsValid).HasColumnName("isValid");
-            entity.Property(e => e.LastLedBookId).HasColumnName("lastLedBookId");
+            entity.Property(e => e.IsSuspend)
+                .HasComment("是否被冻结")
+                .HasColumnName("isSuspend");
+            entity.Property(e => e.IsValid)
+                .HasComment("是否被注销")
+                .HasColumnName("isValid");
+            entity.Property(e => e.LastLedBookId)
+                .HasComment("上一次学习的BookId")
+                .HasColumnName("lastLedBookId");
             entity.Property(e => e.LastLoginTime)
-                .HasColumnType("smalldatetime")
+                .HasColumnType("datetime")
                 .HasColumnName("lastLoginTime");
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(256)
@@ -328,8 +373,9 @@ public partial class PuppylearnContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("passwordSalt");
+            entity.Property(e => e.Settings).HasColumnName("settings");
             entity.Property(e => e.SignUpTime)
-                .HasColumnType("smalldatetime")
+                .HasColumnType("datetime")
                 .HasColumnName("signUpTime");
             entity.Property(e => e.UserName)
                 .HasMaxLength(50)
@@ -338,7 +384,7 @@ public partial class PuppylearnContext : DbContext
             entity.HasOne(d => d.AccountType).WithMany(p => p.Users)
                 .HasForeignKey(d => d.AccountTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Users_AccountTypes");
+                .HasConstraintName("FK_Users_AccountTypes1");
         });
 
         modelBuilder.Entity<UserBook>(entity =>
@@ -349,16 +395,24 @@ public partial class PuppylearnContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.BookId).HasColumnName("bookId");
-            entity.Property(e => e.Finished).HasColumnName("finished");
+            entity.Property(e => e.Finished)
+                .HasComment("是否学习完成")
+                .HasColumnName("finished");
             entity.Property(e => e.LastUpdateTime)
-                .HasColumnType("smalldatetime")
+                .HasComment("上次背这本词典的时间")
+                .HasColumnType("datetime")
                 .HasColumnName("lastUpdateTime");
-            entity.Property(e => e.RepeatTimes).HasColumnName("repeatTimes");
+            entity.Property(e => e.RepeatTimes)
+                .HasComment("学习了几遍")
+                .HasColumnName("repeatTimes");
             entity.Property(e => e.StartDateTime)
-                .HasColumnType("smalldatetime")
+                .HasComment("开始学习某本书的datetime")
+                .HasColumnType("datetime")
                 .HasColumnName("startDateTime");
             entity.Property(e => e.UserId).HasColumnName("userId");
-            entity.Property(e => e.WordsPerday).HasColumnName("wordsPerday");
+            entity.Property(e => e.WordsDone)
+                .HasComment("已经完成学习的单词个数")
+                .HasColumnName("wordsDone");
 
             entity.HasOne(d => d.Book).WithMany(p => p.UserBooks)
                 .HasForeignKey(d => d.BookId)
@@ -373,26 +427,31 @@ public partial class PuppylearnContext : DbContext
 
         modelBuilder.Entity<UserCreatedVocabularyEn>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK_UserCreatedBooks_en");
+
             entity.ToTable("UserCreatedVocabulary_en");
 
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.CreateTime)
-                .HasColumnType("smalldatetime")
+                .HasComment("单词本创建时间")
+                .HasColumnType("datetime")
                 .HasColumnName("createTime");
             entity.Property(e => e.LastUpdateTime)
-                .HasColumnType("smalldatetime")
+                .HasComment("上次修改时间")
+                .HasColumnType("datetime")
                 .HasColumnName("lastUpdateTime");
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.VocabularyName)
                 .HasMaxLength(50)
+                .HasComment("单词本名称")
                 .HasColumnName("vocabularyName");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserCreatedVocabularyEns)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserCreatedVocabulary_en_Users");
+                .HasConstraintName("FK_UserCreatedBooks_en_Users");
         });
 
         modelBuilder.Entity<UserVocabulary>(entity =>
@@ -403,12 +462,19 @@ public partial class PuppylearnContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.AddTime)
-                .HasColumnType("smalldatetime")
+                .HasComment("用户何时添加单词到单词本")
+                .HasColumnType("datetime")
                 .HasColumnName("addTime");
-            entity.Property(e => e.BookId).HasColumnName("bookId");
+            entity.Property(e => e.BookId)
+                .HasComment("该单词来自于哪本书")
+                .HasColumnName("bookId");
             entity.Property(e => e.UserId).HasColumnName("userId");
-            entity.Property(e => e.VocabularyId).HasColumnName("vocabularyId");
-            entity.Property(e => e.WordId).HasColumnName("wordId");
+            entity.Property(e => e.VocabularyId)
+                .HasComment("添加到哪个单词本")
+                .HasColumnName("vocabularyId");
+            entity.Property(e => e.WordId)
+                .HasComment("添加了哪个单词")
+                .HasColumnName("wordId");
 
             entity.HasOne(d => d.Book).WithMany(p => p.UserVocabularies)
                 .HasForeignKey(d => d.BookId)
@@ -423,7 +489,7 @@ public partial class PuppylearnContext : DbContext
             entity.HasOne(d => d.Vocabulary).WithMany(p => p.UserVocabularies)
                 .HasForeignKey(d => d.VocabularyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_User_Vocabulary_UserCreatedVocabulary_en");
+                .HasConstraintName("FK_User_Vocabulary_UserCreatedBooks_en");
 
             entity.HasOne(d => d.Word).WithMany(p => p.UserVocabularies)
                 .HasForeignKey(d => d.WordId)
@@ -433,30 +499,38 @@ public partial class PuppylearnContext : DbContext
 
         modelBuilder.Entity<Word>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK_words");
+
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.BookId).HasColumnName("bookId");
             entity.Property(e => e.Phone)
                 .HasMaxLength(200)
+                .HasComment("有些只有一个phone")
                 .HasColumnName("phone");
             entity.Property(e => e.Speech)
                 .HasMaxLength(200)
                 .HasColumnName("speech");
             entity.Property(e => e.Ukphone)
                 .HasMaxLength(100)
+                .HasComment("英式音标")
                 .HasColumnName("ukphone");
             entity.Property(e => e.Ukspeech)
                 .HasMaxLength(200)
+                .HasComment("英式发音请求url")
                 .HasColumnName("ukspeech");
             entity.Property(e => e.Usphone)
                 .HasMaxLength(100)
+                .HasComment("美式音标")
                 .HasColumnName("usphone");
             entity.Property(e => e.Usspeech)
                 .HasMaxLength(200)
+                .HasComment("美式发音请求url")
                 .HasColumnName("usspeech");
             entity.Property(e => e.WordName)
                 .HasMaxLength(50)
+                .HasComment("单词")
                 .HasColumnName("wordName");
 
             entity.HasOne(d => d.Book).WithMany(p => p.Words)

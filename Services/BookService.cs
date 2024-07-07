@@ -11,15 +11,14 @@ namespace PuppyLearn.Services
 {
     public class BookService : IBookService
     {
-        private readonly PuppylearnContext _context;
+        private readonly PuppyLearnContext _context;
         private readonly IMapper _mapper;
 
-        public BookService(PuppylearnContext context, IMapper mapper )
+        public BookService(PuppyLearnContext context, IMapper mapper )
         {
             _context = context;
             _mapper = mapper;
         }
-
         public async Task<ReturnValue> AddbyFolderUrl(string url)
         {
 
@@ -34,10 +33,13 @@ namespace PuppyLearn.Services
                     var wordsCount = jsonBookObj.Count;
 
                     #region get bookName from table Books_en and check existence first.
+                    #region table Books_en
                     var bookName = (string)jsonBookObj.First.bookId.Value;
                     await Console.Out.WriteLineAsync(bookName);
                     bool isBookExist = await _context.BooksEns.Where(a => a.BookName==bookName).FirstOrDefaultAsync() !=null;
                     Guid bookId;
+                    string bookNameCh;
+                    string catalog;
                     if (isBookExist)
                     {
                         bookId = await _context.BooksEns.Where(a=>a.BookName== bookName).Select(a=>a.Id).SingleOrDefaultAsync();
@@ -46,20 +48,24 @@ namespace PuppyLearn.Services
                     {
                         bookId = Guid.NewGuid();
                     }
-                    
+                    bookNameCh = Global.GetBookNameCh(bookName);
+                    catalog = Global.GetCatalog(bookNameCh);
                     var book = new BooksEn
                     {
                         Id = bookId,
                         BookName = bookName,
-                        WordsCount = wordsCount
+                        WordsCount = wordsCount,
+                        BookNameCh = bookNameCh,
+                        Catalog = catalog,
                     };
                     if (!isBookExist)
                     {
                         await _context.BooksEns.AddAsync(book);
                     }
                     #endregion
+                    #endregion
 
-                    #region insert into all other tables for each word interating
+                    #region insert into all other tables for each word inserating
                     foreach (var wordObj in jsonBookObj)
                     {
                         await Console.Out.WriteLineAsync((string)wordObj.headWord.Value);
@@ -208,7 +214,7 @@ namespace PuppyLearn.Services
 
                                 pos = (tran["pos"] != null) ? (string)tran.pos.Value : "";
                                 transCn = (tran["tranCn"] != null) ? (string)tran.tranCn.Value : "";
-                                transEn = (tran["tranOther"] != null) ? (string)tran.tranCn.Value : "";
+                                transEn = (tran["tranOther"] != null) ? (string)tran.tranOther.Value : "";
 
                                 var transEntry = new Tran
                                 {
@@ -270,8 +276,11 @@ namespace PuppyLearn.Services
                             await _context.RemMethods.AddAsync(remMethod);
                         }
                         #endregion
+
+                        #region table Words
                         await _context.Words.AddAsync(wordEntry);
-                        }
+                        #endregion
+                    }
                     #endregion
                     await _context.SaveChangesAsync();  
                 }
@@ -294,7 +303,6 @@ namespace PuppyLearn.Services
                 };
             }
         }
-
         public async Task<ReturnValue> GetBookList(CancellationToken cancellationToken)
         {
             try
@@ -340,7 +348,6 @@ namespace PuppyLearn.Services
             }
             
         }
-
         public async Task<ReturnValue> GetUserBookById(Guid bookId,Guid userId, CancellationToken cancellationToken)
         {
             try

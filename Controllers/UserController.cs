@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.IdentityModel.Tokens;
+using PuppyLearn.Models;
 using PuppyLearn.Models.Dto;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
@@ -27,8 +29,7 @@ namespace PuppyLearn.Controllers
         [HttpPost("register")]
         public async Task<ReturnValue> RegisterAsync([FromBody] RegisterDto registerDto, CancellationToken cancellationToken)
         {
-            var res = await _userService.RegisterAsync(registerDto, cancellationToken);
-            return res;
+            return await _userService.RegisterAsync(registerDto, cancellationToken);
         }
 
         [AllowAnonymous]
@@ -42,13 +43,13 @@ namespace PuppyLearn.Controllers
                  {
                     new Claim("UserId", res.Value.Id.ToString()),
                     new Claim("UserName", res.Value.UserName),
-				    new Claim("SignUpTime", res.Value.SignUpTime.ToString()),
-                    new Claim("LastLoginTime", res.Value.LastLoginTime!=null ? res.Value.LastLoginTime.ToString():""),
+				    //new Claim("SignUpTime", res.Value.SignUpTime.ToString()),
+                    //new Claim("LastLoginTime", res.Value.LastLoginTime!=null ? res.Value.LastLoginTime.ToString():""),
                     new Claim(ClaimTypes.Role, Global.GetAccountTypeStr(res.Value.AccountTypeId)),
-                    new Claim("IsSuspend", res.Value.IsSuspend.ToString()),
-                    new Claim("IsValid", res.Value.IsValid.ToString()),
+                    //new Claim("IsSuspend", res.Value.IsSuspend.ToString()),
+                    //new Claim("IsValid", res.Value.IsValid.ToString()),
                     new Claim("Email", res.Value.Email),
-                    new Claim("LastLedBookId", res.Value.LastLedBookId!=null ? res.Value.LastLedBookId.ToString():"")
+                    //new Claim("LastLedBookId", res.Value.LastLedBookId!=null ? res.Value.LastLedBookId.ToString():"")
                 };
                 // 下面的securityKey存放在服务器。
                 var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:key"]));
@@ -57,7 +58,7 @@ namespace PuppyLearn.Controllers
                         issuer: _config["JWT:Issuer"],
                         audience: _config["JWT:Audience"],
                         claims: claims,
-                        expires: DateTime.Now.AddDays(7),
+                        expires: DateTime.Now.AddDays(1),
                         signingCredentials: new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256)
                     );
                 var token = new JwtSecurityTokenHandler().WriteToken(jwt);
@@ -66,18 +67,95 @@ namespace PuppyLearn.Controllers
             return res;
         }
 
-        [HttpPost("addBooks/{userId}")]
-        public async Task<ReturnValue> AddNewBooksAsync([FromRoute]Guid userId, [FromBody]List<BookDto> bookDtoList, CancellationToken cancellationToken)
+        /// <summary>
+        /// 更新当前选择背诵的书List。
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="bookDtoList"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("updatebooks/{userId}")]
+        [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
+        public async Task<ReturnValue> UpdateSelectedBooksAsync([FromRoute]Guid userId, [FromBody]List<BookDto> bookDtoList, CancellationToken cancellationToken)
         {
-            var res = await _userService.AddNewBooksAsync(userId, bookDtoList, cancellationToken);
-            return res;
+            return await _userService.UpdateSelectedBooksAsync(userId, bookDtoList, cancellationToken);
         }
 
-        [HttpPost("userBook/{userId}")]
-        public  async Task<ReturnValue> GetUserBook([FromRoute]Guid userId, CancellationToken cancellationToken)
+        /// <summary>
+        /// 获取用户当前选择的书List。
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("userbook/{userId}")]
+        [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
+        public  async Task<ReturnValue> GetUserBookAsync([FromRoute]Guid userId, CancellationToken cancellationToken)
         {
             var res = await _userService.GetUserBooksAsync(userId, cancellationToken);
             return res;
+        }
+
+        [HttpGet("allWords/{userId}/{bookId}/{skip}/{take}/{totalRecords}")]
+        [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
+        public async Task<ReturnValue> GetAllWordsFromABookAsync([FromRoute] Guid userId, [FromRoute] Guid bookId, [FromRoute] int skip, [FromRoute] int take, [FromRoute] int totalRecords,[FromRoute] string? wordName, CancellationToken cancellationToken)
+        {
+            return await _userService.GetWordsFromABookAsync(userId, bookId, skip, take, totalRecords, wordName, cancellationToken);
+        }
+
+        [HttpGet("allWords/{userId}/{bookId}/{wordName}")]
+        [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
+        public async Task<ReturnValue> GetOneWordFromABookAsync([FromRoute] Guid userId, [FromRoute] Guid bookId, [FromRoute] string wordName, CancellationToken cancellationToken)
+        {
+            return await _userService.GetWordsFromABookAsync(userId, bookId,0,0,0, wordName, cancellationToken);
+        }
+
+        [HttpGet("oneword/{userId}/{wordName}")]
+        [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
+        public async Task<ReturnValue> GetOneWordFromAllBooksAsync([FromRoute]Guid userId, [FromRoute] string wordName, CancellationToken cancellationToken)
+        {
+            return await _userService.GetOneWordFromAllBookAsync(userId, wordName, cancellationToken);
+        }
+
+        [HttpPut("updateword/{userId}/{bookId}")]
+        [AuthorizeRoles(Roles.admin, Roles.superAdmin)]
+        public async Task<ReturnValue> UpdateWordChangesAsync([FromRoute] Guid userId, [FromRoute] Guid bookId, [FromBody] WordNFieldsDto wordNFieldsDto, CancellationToken cancellationToken)
+        {
+            return await _userService.UpdateAWordAsync(userId, bookId, wordNFieldsDto, cancellationToken);
+        }
+
+        [HttpDelete("delfield/{userId}/{fieldId}/{field}")]
+        [AuthorizeRoles(Roles.admin, Roles.superAdmin)]
+        public async Task<ReturnValue> DelFieldofAWordAsync([FromRoute] Guid userId, [FromRoute] Guid fieldId, [FromRoute] string field, CancellationToken cancellationToken)
+        {
+            return await _userService.DelFieldofAWordAsync(userId , fieldId, field, cancellationToken);
+        }
+
+        /// <summary>
+        /// 获取List<LearnTransCardDto>
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="wordsCount"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet("gettrans/{userId}/{bookId}/{wordsCount}")]
+        [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
+        public async Task<ReturnValue> LearnTransAsync([FromRoute] Guid userId, [FromRoute] Guid bookId, [FromRoute] int wordsCount, CancellationToken cancellationToken)
+        {
+            return await _userService.LearnTransAsync(userId, bookId, wordsCount, cancellationToken);
+        }
+
+        [HttpPost("updatesettings/{userId}")]
+        [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
+        public async Task<ReturnValue> UpdateUserSettings([FromRoute] Guid userId, [FromBody] UserSettings settings, CancellationToken cancellationToken)
+        {
+            return await _userService.UpdateUserSettings(userId, settings, cancellationToken);
+        }
+
+        [HttpPost("updateprogress/{userId}/{bookId}")]
+        [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
+        public async Task<ReturnValue> UpdateProgress([FromRoute] Guid userId, [FromRoute] Guid bookId, [FromBody] List<LearnTransDto> words, CancellationToken cancellationToken)
+        {
+            return await  _userService.UpdateProgress(userId, bookId, words, cancellationToken);
         }
     }
 }
