@@ -21,7 +21,7 @@ builder.Services.AddDbContext<PuppyLearnContext>(
     options.UseSqlServer(builder.Configuration.GetConnectionString("PuppyLearn"),
     sqlServerOptions =>
     {
-        sqlServerOptions.CommandTimeout(16);
+        sqlServerOptions.CommandTimeout(60);
         sqlServerOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), null);
     }));
 
