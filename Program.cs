@@ -18,7 +18,12 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 
 builder.Services.AddDbContext<PuppyLearnContext>(
     options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("PuppyLearn")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PuppyLearn"),
+    sqlServerOptions =>
+    {
+        sqlServerOptions.CommandTimeout(16);
+        sqlServerOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), null);
+    }));
 
 // AutoMapper register
 builder.Services.AddAutoMapper(typeof(UserProfiles));
