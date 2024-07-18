@@ -21,8 +21,8 @@ builder.Services.AddDbContext<PuppyLearnContext>(
     options.UseSqlServer(builder.Configuration.GetConnectionString("PuppyLearn"),
     sqlServerOptions =>
     {
-        sqlServerOptions.CommandTimeout(60);
-        sqlServerOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), null);
+        sqlServerOptions.CommandTimeout(70);
+        sqlServerOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(3), null);
     }));
 
 // AutoMapper register

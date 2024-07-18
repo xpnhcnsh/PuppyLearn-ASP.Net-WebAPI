@@ -1071,10 +1071,10 @@ namespace PuppyLearn.Services
 
                     #region construct old word list
                     var statusNullWordIds = _context.Progresses.AsNoTracking().Where(x => x.UserId == userId && x.BookId == bookId && x.Status == 0).Select(x => x.WordId);
-                    var statusOneWordIds = _context.Progresses.AsNoTracking().Where(x => x.UserId == userId && x.BookId == bookId && x.Status == 1).Select(x => x.WordId);
-                    var statusTwoWordIds = _context.Progresses.AsNoTracking().Where(x => x.UserId == userId && x.BookId == bookId && x.Status == 2).Select(x => x.WordId);
-                    var statusThreeWordIds = _context.Progresses.AsNoTracking().Where(x => x.UserId == userId && x.BookId == bookId && x.Status == 3).Select(x => x.WordId);
-                    var oldWordId = statusOneWordIds ?? Enumerable.Empty<Guid>().Concat(statusTwoWordIds?? Enumerable.Empty<Guid>()).Concat(statusThreeWordIds ?? Enumerable.Empty<Guid>());
+                    var statusOneWordIds = _context.Progresses.AsNoTracking().Where(x => x.UserId == userId && x.BookId == bookId && x.Status == 1).Take(statusOneCount).Select(x => x.WordId);
+                    var statusTwoWordIds = _context.Progresses.AsNoTracking().Where(x => x.UserId == userId && x.BookId == bookId && x.Status == 2).Take(statusTwoCount).Select(x => x.WordId);
+                    var statusThreeWordIds = _context.Progresses.AsNoTracking().Where(x => x.UserId == userId && x.BookId == bookId && x.Status == 3).Take(statusThreeCount).Select(x => x.WordId);
+                    var oldWordId = ((statusOneWordIds ?? Enumerable.Empty<Guid>()).Union(statusTwoWordIds?? Enumerable.Empty<Guid>())).Union(statusThreeWordIds ?? Enumerable.Empty<Guid>());
                     var oldWordsDto = await _context.Words.AsNoTracking().Where(x => oldWordId.Contains(x.Id))
                         .Select(x => new WordDto
                         {
