@@ -17,8 +17,9 @@ namespace PuppyLearn.Services.Interfaces
         public Task<ReturnValue> UpdateAWordAsync(Guid userId, Guid bookId, WordNFieldsDto wordNFieldsDto, CancellationToken cancellationToken);
         public Task<ReturnValue> DelFieldofAWordAsync(Guid userId, Guid fieldId, string field, CancellationToken cancellationToken);
         public Task<ReturnValue> LearnTransAsync(Guid userId, Guid bookId, int wordsCount, CancellationToken cancellationToken);
-        public Task<ReturnValue> UpdateUserSettings(Guid userId,  UserSettings settings, CancellationToken cancellationToken);
-        public Task<ReturnValue> UpdateProgress(Guid userId, Guid bookId, List<LearnTransDto> words, CancellationToken cancellationToken);
+        public Task<ReturnValue> UpdateUserSettingsAsync(Guid userId,  UserSettings settings, CancellationToken cancellationToken);
+        public Task<ReturnValue> UpdateProgressAsync(Guid userId, Guid bookId, List<LearnTransDto> words, CancellationToken cancellationToken);
+        public Task<ReturnValue> ReportAWordAsync(WordReportDto reportDto, CancellationToken cancellationToken);
     }
 }
 

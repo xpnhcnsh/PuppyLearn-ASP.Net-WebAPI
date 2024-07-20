@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration.UserSecrets;
+using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using PuppyLearn.Models;
 using PuppyLearn.Models.Dto;
@@ -146,16 +147,23 @@ namespace PuppyLearn.Controllers
 
         [HttpPost("updatesettings/{userId}")]
         [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
-        public async Task<ReturnValue> UpdateUserSettings([FromRoute] Guid userId, [FromBody] UserSettings settings, CancellationToken cancellationToken)
+        public async Task<ReturnValue> UpdateUserSettingsAsync([FromRoute] Guid userId, [FromBody] UserSettings settings, CancellationToken cancellationToken)
         {
-            return await _userService.UpdateUserSettings(userId, settings, cancellationToken);
+            return await _userService.UpdateUserSettingsAsync(userId, settings, cancellationToken);
         }
 
         [HttpPost("updateprogress/{userId}/{bookId}")]
         [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
-        public async Task<ReturnValue> UpdateProgress([FromRoute] Guid userId, [FromRoute] Guid bookId, [FromBody] List<LearnTransDto> words, CancellationToken cancellationToken)
+        public async Task<ReturnValue> UpdateProgressAsync([FromRoute] Guid userId, [FromRoute] Guid bookId, [FromBody] List<LearnTransDto> words, CancellationToken cancellationToken)
         {
-            return await  _userService.UpdateProgress(userId, bookId, words, cancellationToken);
+            return await _userService.UpdateProgressAsync(userId, bookId, words, cancellationToken);
+        }
+
+        [HttpPost("reportword")]
+        [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
+        public async Task<ReturnValue> ReportAWordAsync([FromBody] WordReportDto reportDto, CancellationToken cancellationToken)
+        {
+            return await _userService.ReportAWordAsync(reportDto, cancellationToken);
         }
     }
 }

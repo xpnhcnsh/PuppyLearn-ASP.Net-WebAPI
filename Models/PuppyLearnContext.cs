@@ -45,6 +45,8 @@ public partial class PuppyLearnContext : DbContext
 
     public virtual DbSet<Word> Words { get; set; }
 
+    public virtual DbSet<WordReport> WordReports { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -159,7 +161,7 @@ public partial class PuppyLearnContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("lastUpdateTime");
             entity.Property(e => e.Status)
-                .HasComment("1:1级；2:2级；3:3级（等级越高，表示本单词背错的次数越多，每次生成背诵List时，从3级选择较最多单词，2级选择中等个数单词，从1级选择最少的单词；如果背刺背错，则升级，反之降级；最高3级，当为0级时，从Progress表里删除本条目。）")
+                .HasComment("0:0级；1:1级；2:2级；3:3级（等级越高，表示本单词背错的次数越多，每次生成背诵List时，从3级选择较最多单词，2级选择中等个数单词，从1级选择最少的单词；如果背刺背错，则升级，反之降级；最高3级，当为0级时，表示该单词已背过不再出现。当用户把正本单词背完时，从本表删除本书中所有单词）")
                 .HasColumnName("status");
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.WordId).HasColumnName("wordId");
@@ -537,6 +539,40 @@ public partial class PuppyLearnContext : DbContext
                 .HasForeignKey(d => d.BookId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Words_Books_en");
+        });
+
+        modelBuilder.Entity<WordReport>(entity =>
+        {
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Comment)
+                .HasMaxLength(1000)
+                .HasColumnName("comment");
+            entity.Property(e => e.Fields)
+                .HasMaxLength(100)
+                .HasColumnName("fields");
+            entity.Property(e => e.ProcessTime)
+                .HasColumnType("datetime")
+                .HasColumnName("processTime");
+            entity.Property(e => e.Status)
+                .HasComment("1:已处理；0未处理")
+                .HasColumnName("status");
+            entity.Property(e => e.SubmitTime)
+                .HasColumnType("datetime")
+                .HasColumnName("submitTime");
+            entity.Property(e => e.UserId).HasColumnName("userId");
+            entity.Property(e => e.WordId).HasColumnName("wordId");
+
+            entity.HasOne(d => d.User).WithMany(p => p.WordReports)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_WordReports_Users");
+
+            entity.HasOne(d => d.Word).WithMany(p => p.WordReports)
+                .HasForeignKey(d => d.WordId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_WordReports_Words");
         });
 
         OnModelCreatingPartial(modelBuilder);

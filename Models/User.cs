@@ -48,4 +48,6 @@ public partial class User
     public virtual ICollection<UserCreatedVocabularyEn> UserCreatedVocabularyEns { get; set; } = new List<UserCreatedVocabularyEn>();
 
     public virtual ICollection<UserVocabulary> UserVocabularies { get; set; } = new List<UserVocabulary>();
+
+    public virtual ICollection<WordReport> WordReports { get; set; } = new List<WordReport>();
 }

@@ -46,6 +46,13 @@ namespace PuppyLearn.Profiles
             dest => dest.Trans,
                 opt => opt.MapFrom(src => src.Trans));
 
+            CreateMap<WordReportDto, WordReport>()
+                .ForMember(
+                dest => dest.Id,
+                opt => opt.MapFrom(src => Guid.NewGuid()))
+                .ForMember(
+                dest => dest.SubmitTime,
+                opt => opt.MapFrom(src => DateTime.Now));
         }
     }
 }

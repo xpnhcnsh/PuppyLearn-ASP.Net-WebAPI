@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using PuppyLearn.Models;
 using PuppyLearn.Models.Dto;
@@ -42,6 +43,7 @@ namespace PuppyLearn.Services
                     newUser.PasswordSalt = Hasher.GenerateSalt();
                     newUser.PasswordHash = Hasher.ComputeHash(registerDto.Password, Convert.FromBase64String(newUser.PasswordSalt));
                     newUser.SignUpTime = DateTime.Now;
+                    newUser.Settings = JsonConvert.SerializeObject(Global.GetDefaultUserSettings());
                     await _context.Users.AddAsync(newUser, cancellationToken);
                     await _context.SaveChangesAsync(cancellationToken);
 
@@ -107,11 +109,6 @@ namespace PuppyLearn.Services
                         };
                     }
                     var userDto = _mapper.Map<UserDto>(user);
-                    if (userDto.Settings == null)
-                    {
-                        userDto.Settings = JsonConvert.SerializeObject(Global.GetDefaultUserSettings());
-                    }
-
                     return new ReturnValue
                     {
                         Value = userDto,
@@ -1213,7 +1210,7 @@ namespace PuppyLearn.Services
             
         }
 
-        public async Task<ReturnValue> UpdateUserSettings(Guid userId, UserSettings newSettings, CancellationToken cancellationToken)
+        public async Task<ReturnValue> UpdateUserSettingsAsync(Guid userId, UserSettings newSettings, CancellationToken cancellationToken)
         {
             User? user = await _context.Users.Where(x=>x.Id == userId).SingleOrDefaultAsync(cancellationToken);
             if (user == null)
@@ -1235,7 +1232,7 @@ namespace PuppyLearn.Services
             };
         }
 
-        public async Task<ReturnValue> UpdateProgress(Guid userId, Guid bookId, List<LearnTransDto> words, CancellationToken cancellationToken)
+        public async Task<ReturnValue> UpdateProgressAsync(Guid userId, Guid bookId, List<LearnTransDto> words, CancellationToken cancellationToken)
         {
             try
             {
@@ -1335,6 +1332,53 @@ namespace PuppyLearn.Services
                 return new ReturnValue
                 {
                     Value = $"userId: {userId}; bookId: {bookId};",
+                    Msg = ex.Message,
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+        }
+
+        public async Task<ReturnValue> ReportAWordAsync(WordReportDto reportDto, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    WordReport report = _mapper.Map<WordReport>(reportDto);
+                    _context.WordReports.Add(report);
+                    await _context.SaveChangesAsync();
+                    return new ReturnValue
+                    {
+                        Msg = "Report submitted, thanks for you help! ",
+                        Value = reportDto,
+                        HttpCode = HttpStatusCode.OK,
+                    };
+                }
+                else
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return new ReturnValue
+                    {
+                        Value = $"userId: {reportDto.UserId}; wordId: {reportDto.WordId};",
+                        Msg = "用户取消操作",
+                        HttpCode = HttpStatusCode.BadRequest
+                    };
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                return new ReturnValue
+                {
+                    Value = $"userId: {reportDto.UserId}; wordId: {reportDto.WordId};",
+                    Msg = ex.Message,
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ReturnValue
+                {
+                    Value = $"userId: {reportDto.UserId}; wordId: {reportDto.WordId};",
                     Msg = ex.Message,
                     HttpCode = HttpStatusCode.BadRequest
                 };

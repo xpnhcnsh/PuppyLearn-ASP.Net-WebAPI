@@ -60,4 +60,6 @@ public partial class Word
     public virtual ICollection<Tran> Trans { get; set; } = new List<Tran>();
 
     public virtual ICollection<UserVocabulary> UserVocabularies { get; set; } = new List<UserVocabulary>();
+
+    public virtual ICollection<WordReport> WordReports { get; set; } = new List<WordReport>();
 }

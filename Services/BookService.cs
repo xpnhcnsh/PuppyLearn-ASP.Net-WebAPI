@@ -6,6 +6,7 @@ using PuppyLearn.Models.Dto;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
 using System.Net;
+using System.Threading;
 
 namespace PuppyLearn.Services
 {
@@ -378,7 +379,51 @@ namespace PuppyLearn.Services
                 return new ReturnValue
                 {
                     Value = ex.Message,
-                    Msg = "用户取消用户取消GetUserBookById",
+                    Msg = "用户取消GetUserBookById",
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ReturnValue
+                {
+                    Value = ex.Message,
+                    Msg = "error",
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+        }
+        public async Task<ReturnValue> GetWordReports( CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    var res = await _context.WordReports.Include(x=>x.Word).Include(x=>x.User).ToListAsync();
+                    return new ReturnValue
+                    {
+                        Value = res,
+                        Msg = "查询成功，返回结果",
+                        HttpCode = HttpStatusCode.OK
+                    };
+                }
+                else
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return new ReturnValue
+                    {
+                        Value = null,
+                        Msg = "用户取消GetWordReports",
+                        HttpCode = HttpStatusCode.BadRequest
+                    };
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                return new ReturnValue
+                {
+                    Value = ex.Message,
+                    Msg = "用户取消GetWordReports",
                     HttpCode = HttpStatusCode.BadRequest
                 };
             }
