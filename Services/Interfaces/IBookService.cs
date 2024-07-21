@@ -1,4 +1,5 @@
-﻿using PuppyLearn.Utilities;
+﻿using PuppyLearn.Models;
+using PuppyLearn.Utilities;
 
 namespace PuppyLearn.Services.Interfaces
 {
@@ -14,5 +15,6 @@ namespace PuppyLearn.Services.Interfaces
         public Task<ReturnValue> GetWordReports(CancellationToken cancellationToken);
         public Task<ReturnValue> GetBookList(CancellationToken cancellationToken);
         public Task<ReturnValue> GetUserBookById(Guid bookId, Guid userId, CancellationToken cancellationToken);
+        public Task<ReturnValue> UpdateAWordReport(Guid reportId, CancellationToken cancellationToken);
     }
 }

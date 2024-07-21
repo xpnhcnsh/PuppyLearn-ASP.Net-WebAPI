@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
-using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using PuppyLearn.Models;
 using PuppyLearn.Models.Dto;

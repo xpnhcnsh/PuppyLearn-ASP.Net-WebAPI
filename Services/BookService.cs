@@ -399,7 +399,15 @@ namespace PuppyLearn.Services
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    var res = await _context.WordReports.Include(x=>x.Word).Include(x=>x.User).ToListAsync();
+                    var res = await _context.WordReports.Include(x=>x.Word).ThenInclude(z=>z.Cognates)
+                        .Include(x => x.Word).ThenInclude(z => z.Phrases)
+                        .Include(x => x.Word).ThenInclude(z => z.RemMethods)
+                        .Include(x => x.Word).ThenInclude(z => z.Sentences)
+                        .Include(x => x.Word).ThenInclude(z => z.SingleChoiceQuestions)
+                        .Include(x => x.Word).ThenInclude(z => z.Synonymous)
+                        .Include(x => x.Word).ThenInclude(z => z.Trans)
+                        .Include(x => x.Word).ThenInclude(z => z.Book)
+                        .Include(x=>x.User).ToListAsync();
                     return new ReturnValue
                     {
                         Value = res,
@@ -437,5 +445,57 @@ namespace PuppyLearn.Services
                 };
             }
         }
+
+        public async Task<ReturnValue> UpdateAWordReport(Guid reportId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    var res = await _context.WordReports.Where(x=>x.Id == reportId).SingleOrDefaultAsync();
+                    if (res != null) 
+                    {
+                        res.Status = true;
+                        res.ProcessTime = DateTime.Now;
+                    }
+                    await _context.SaveChangesAsync();
+                    return new ReturnValue
+                    {
+                        Value = res,
+                        Msg = "修改成功",
+                        HttpCode = HttpStatusCode.OK
+                    };
+                }
+                else
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return new ReturnValue
+                    {
+                        Value = null,
+                        Msg = "用户取消UpdateAWordReport",
+                        HttpCode = HttpStatusCode.BadRequest
+                    };
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                return new ReturnValue
+                {
+                    Value = ex.Message,
+                    Msg = "用户取消UpdateAWordReport",
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ReturnValue
+                {
+                    Value = ex.Message,
+                    Msg = "error",
+                    HttpCode = HttpStatusCode.BadRequest
+                };
+            }
+        }
+    
     }
 }

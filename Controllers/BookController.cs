@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PuppyLearn.Models.Dto;
-using PuppyLearn.Services;
+using PuppyLearn.Models;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
 
@@ -46,9 +45,16 @@ namespace PuppyLearn.Controllers
 
         [HttpGet("wordreports")]
         [AuthorizeRoles(Roles.admin, Roles.superAdmin)]
-        public async Task<ReturnValue> GetWordReports(CancellationToken cancellationToken)
+        public async Task<ReturnValue> GetWordReportsAsync(CancellationToken cancellationToken)
         {
             return await _bookService.GetWordReports(cancellationToken);
+        }
+
+        [HttpPost("wordreport/{reportId}")]
+        [AuthorizeRoles(Roles.admin, Roles.superAdmin)]
+        public async Task<ReturnValue> UpdateAWordReportAsync([FromRoute] Guid reportId ,CancellationToken cancellationToken)
+        {
+            return await _bookService.UpdateAWordReport(reportId, cancellationToken);
         }
 
     }
