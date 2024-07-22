@@ -19,7 +19,7 @@ namespace PuppyLearn.Services.Interfaces
         public Task<ReturnValue> LearnTransAsync(Guid userId, Guid bookId, int wordsCount, CancellationToken cancellationToken);
         public Task<ReturnValue> UpdateUserSettingsAsync(Guid userId,  UserSettings settings, CancellationToken cancellationToken);
         public Task<ReturnValue> UpdateProgressAsync(Guid userId, Guid bookId, List<LearnTransDto> words, CancellationToken cancellationToken);
-        public Task<ReturnValue> ReportAWordAsync(WordReportDto reportDto, CancellationToken cancellationToken);
+        public Task<ReturnValue> ReportAWordAsync(WordReportPostDto reportDto, CancellationToken cancellationToken);
     }
 }
 

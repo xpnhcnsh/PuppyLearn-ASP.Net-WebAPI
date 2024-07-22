@@ -46,7 +46,7 @@ namespace PuppyLearn.Profiles
             dest => dest.Trans,
                 opt => opt.MapFrom(src => src.Trans));
 
-            CreateMap<WordReportDto, WordReport>()
+            CreateMap<WordReportPostDto, WordReport>()
                 .ForMember(
                 dest => dest.Id,
                 opt => opt.MapFrom(src => Guid.NewGuid()))

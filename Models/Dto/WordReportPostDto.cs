@@ -1,6 +1,6 @@
 ﻿namespace PuppyLearn.Models.Dto
 {
-    public class WordReportDto
+    public class WordReportPostDto
     {
         public Guid WordId { get; set; }
         public Guid UserId { get; set; }

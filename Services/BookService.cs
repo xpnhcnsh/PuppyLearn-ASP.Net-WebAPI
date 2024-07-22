@@ -393,25 +393,42 @@ namespace PuppyLearn.Services
                 };
             }
         }
-        public async Task<ReturnValue> GetWordReports( CancellationToken cancellationToken)
+        public async Task<ReturnValue> GetWordReports(int skip, int take, CancellationToken cancellationToken)
         {
             try
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    var res = await _context.WordReports.Include(x=>x.Word).ThenInclude(z=>z.Cognates)
-                        .Include(x => x.Word).ThenInclude(z => z.Phrases)
-                        .Include(x => x.Word).ThenInclude(z => z.RemMethods)
-                        .Include(x => x.Word).ThenInclude(z => z.Sentences)
-                        .Include(x => x.Word).ThenInclude(z => z.SingleChoiceQuestions)
-                        .Include(x => x.Word).ThenInclude(z => z.Synonymous)
-                        .Include(x => x.Word).ThenInclude(z => z.Trans)
-                        .Include(x => x.Word).ThenInclude(z => z.Book)
-                        .Include(x=>x.User).ToListAsync();
+                    if(skip < 0|| take <= 0)
+                    {
+                        return new ReturnValue
+                        {
+                            Msg = " Take or Skip is smaller than 0!",
+                            Value = $"{nameof(take)}:{take}; {nameof(skip)}:{skip}.",
+                            HttpCode = HttpStatusCode.BadRequest
+                        };
+                    }
+                    var reportList = await _context.WordReports.AsNoTracking()
+                        .OrderByDescending(x => x.SubmitTime)
+                        .Skip(skip)
+                        .Take(take)
+                        .Select(x => new WordReportGetDto
+                        {
+                            Id = x.Id,
+                            WordName = x.Word.WordName,
+                            Fields = x.Fields,
+                            Comments = x.Comment,
+                            ReportDate = x.SubmitTime,
+                            UserEmail = x.User.Email,
+                            Status = x.Status == false ? "未处理" : "已处理",
+                            BookNameCh = x.Word.Book.BookNameCh!,
+                        })
+                        .ToListAsync(cancellationToken);
+                    var res = new PagedResponseDto<WordReportGetDto>(skip, take, reportList.Count, reportList);
                     return new ReturnValue
                     {
                         Value = res,
-                        Msg = "查询成功，返回结果",
+                        Msg = $"Return {take} records, skip: {skip}",
                         HttpCode = HttpStatusCode.OK
                     };
                 }
@@ -445,7 +462,6 @@ namespace PuppyLearn.Services
                 };
             }
         }
-
         public async Task<ReturnValue> UpdateAWordReport(Guid reportId, CancellationToken cancellationToken)
         {
             try

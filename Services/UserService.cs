@@ -348,7 +348,7 @@ namespace PuppyLearn.Services
                         return new ReturnValue
                         {
                             Msg = " One of parameters is smaller than 0!",
-                            Value = $"{nameof(skip)}:{take}; {nameof(skip)}:{take}; {nameof(totalRecords)}:{totalRecords}.",
+                            Value = $"{nameof(take)}:{take}; {nameof(skip)}:{skip}; {nameof(totalRecords)}:{totalRecords}.",
                             HttpCode = HttpStatusCode.BadRequest
 
                         };
@@ -1337,7 +1337,7 @@ namespace PuppyLearn.Services
             }
         }
 
-        public async Task<ReturnValue> ReportAWordAsync(WordReportDto reportDto, CancellationToken cancellationToken)
+        public async Task<ReturnValue> ReportAWordAsync(WordReportPostDto reportDto, CancellationToken cancellationToken)
         {
             try
             {

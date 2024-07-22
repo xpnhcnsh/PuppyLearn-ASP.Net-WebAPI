@@ -12,7 +12,7 @@ namespace PuppyLearn.Services.Interfaces
         /// <param name="url"></param>
         /// <returns></returns>
         public Task<ReturnValue> AddbyFolderUrl(string url);
-        public Task<ReturnValue> GetWordReports(CancellationToken cancellationToken);
+        public Task<ReturnValue> GetWordReports(int skip, int take, CancellationToken cancellationToken);
         public Task<ReturnValue> GetBookList(CancellationToken cancellationToken);
         public Task<ReturnValue> GetUserBookById(Guid bookId, Guid userId, CancellationToken cancellationToken);
         public Task<ReturnValue> UpdateAWordReport(Guid reportId, CancellationToken cancellationToken);

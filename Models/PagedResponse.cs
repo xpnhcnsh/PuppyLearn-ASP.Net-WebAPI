@@ -7,7 +7,6 @@
         public int TotalPages { get; set; }
         public int TotalRecords { get; set; }
         public List<T> Data { get; set; }
-
         public PagedResponseDto(int skip, int take, int totalRecords, List<T> data)
         {
             Skip = skip;

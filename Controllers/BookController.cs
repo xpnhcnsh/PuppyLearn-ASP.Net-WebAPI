@@ -43,11 +43,11 @@ namespace PuppyLearn.Controllers
             return await _bookService.GetBookList(cancellationToken);
         }
 
-        [HttpGet("wordreports")]
+        [HttpGet("wordreports/{skip}/{take}")]
         [AuthorizeRoles(Roles.admin, Roles.superAdmin)]
-        public async Task<ReturnValue> GetWordReportsAsync(CancellationToken cancellationToken)
+        public async Task<ReturnValue> GetWordReportsAsync([FromRoute] int skip, [FromRoute] int take, CancellationToken cancellationToken)
         {
-            return await _bookService.GetWordReports(cancellationToken);
+            return await _bookService.GetWordReports(skip, take, cancellationToken);
         }
 
         [HttpPost("wordreport/{reportId}")]

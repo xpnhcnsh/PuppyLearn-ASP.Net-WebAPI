@@ -159,7 +159,7 @@ namespace PuppyLearn.Controllers
 
         [HttpPost("reportword")]
         [AuthorizeRoles(Roles.admin, Roles.normalUser, Roles.superAdmin, Roles.teacher, Roles.vip)]
-        public async Task<ReturnValue> ReportAWordAsync([FromBody] WordReportDto reportDto, CancellationToken cancellationToken)
+        public async Task<ReturnValue> ReportAWordAsync([FromBody] WordReportPostDto reportDto, CancellationToken cancellationToken)
         {
             return await _userService.ReportAWordAsync(reportDto, cancellationToken);
         }
