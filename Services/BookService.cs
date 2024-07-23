@@ -6,7 +6,6 @@ using PuppyLearn.Models.Dto;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
 using System.Net;
-using System.Threading;
 
 namespace PuppyLearn.Services
 {
@@ -408,6 +407,7 @@ namespace PuppyLearn.Services
                             HttpCode = HttpStatusCode.BadRequest
                         };
                     }
+                    int totalRecords = await _context.WordReports.CountAsync(cancellationToken);
                     var reportList = await _context.WordReports.AsNoTracking()
                         .OrderByDescending(x => x.SubmitTime)
                         .Skip(skip)
@@ -424,7 +424,7 @@ namespace PuppyLearn.Services
                             BookNameCh = x.Word.Book.BookNameCh!,
                         })
                         .ToListAsync(cancellationToken);
-                    var res = new PagedResponseDto<WordReportGetDto>(skip, take, reportList.Count, reportList);
+                    var res = new PagedResponseDto<WordReportGetDto>(skip, take, totalRecords, reportList);
                     return new ReturnValue
                     {
                         Value = res,
