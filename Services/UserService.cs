@@ -544,7 +544,7 @@ namespace PuppyLearn.Services
                             {
                                 toUpdate.Usphone = wordDto.Usphone;
                             }
-                            else if (field == "ukphones")
+                            else if (field == "ukphone")
                             {
                                 toUpdate.Ukphone = wordDto.Ukphone;
                             }
