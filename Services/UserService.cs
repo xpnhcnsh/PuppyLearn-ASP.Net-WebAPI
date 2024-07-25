@@ -197,7 +197,7 @@ namespace PuppyLearn.Services
                     {
                         foreach (var bookId in duplicatedBookIdList)
                         {
-                            var userBookFromDb = await _bookService.GetUserBookById(bookId, userId, cancellationToken);
+                            var userBookFromDb = await _bookService.GetUserBookByIdAsync(bookId, userId, cancellationToken);
                             if (userBookFromDb.Value.Count > 0 && userBookFromDb.Value[0].Finished == true)
                             {
                                 userBookFromDb.Value[0].Finished = false;
@@ -432,7 +432,8 @@ namespace PuppyLearn.Services
             {
                 if (!cancellationToken.IsCancellationRequested) 
                 {
-                    var res = await _context.Words.Where(x=>x.WordName == wordName).Select(x=>new WordDto
+                    var res = await _context.Words.Where(x=>x.WordName == wordName)
+                        .Select(x=>new WordDto
                     {
                         Id = x.Id,
                         WordName = x.WordName,

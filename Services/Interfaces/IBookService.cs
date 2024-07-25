@@ -11,10 +11,11 @@ namespace PuppyLearn.Services.Interfaces
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public Task<ReturnValue> AddbyFolderUrl(string url);
-        public Task<ReturnValue> GetWordReports(int skip, int take, CancellationToken cancellationToken);
-        public Task<ReturnValue> GetBookList(CancellationToken cancellationToken);
-        public Task<ReturnValue> GetUserBookById(Guid bookId, Guid userId, CancellationToken cancellationToken);
-        public Task<ReturnValue> UpdateAWordReport(Guid reportId, CancellationToken cancellationToken);
+        public Task<ReturnValue> AddbyFolderUrlAsync(string url);
+        public Task<ReturnValue> GetWordReportsAsync(int skip, int take, CancellationToken cancellationToken);
+        public Task<ReturnValue> GetBookListAsync(CancellationToken cancellationToken);
+        public Task<ReturnValue> GetUserBookByIdAsync(Guid bookId, Guid userId, CancellationToken cancellationToken);
+        public Task<ReturnValue> UpdateAWordReportAsync(Guid reportId, CancellationToken cancellationToken);
+        public Task<ReturnValue> GetWordsByTrans(string trans, CancellationToken cancellationToken);
     }
 }

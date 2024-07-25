@@ -6,6 +6,7 @@ using PuppyLearn.Models.Dto;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
 using System.Net;
+using System.Threading;
 
 namespace PuppyLearn.Services
 {
@@ -19,7 +20,7 @@ namespace PuppyLearn.Services
             _context = context;
             _mapper = mapper;
         }
-        public async Task<ReturnValue> AddbyFolderUrl(string url)
+        public async Task<ReturnValue> AddbyFolderUrlAsync(string url)
         {
 
             if (Directory.Exists(url))
@@ -303,7 +304,7 @@ namespace PuppyLearn.Services
                 };
             }
         }
-        public async Task<ReturnValue> GetBookList(CancellationToken cancellationToken)
+        public async Task<ReturnValue> GetBookListAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -328,15 +329,6 @@ namespace PuppyLearn.Services
                     };
                 }
             }
-            catch (OperationCanceledException ex)
-            {
-                return new ReturnValue
-                {
-                    Value = ex.Message,
-                    Msg = "用户取消GetBookList",
-                    HttpCode = HttpStatusCode.BadRequest
-                };
-            }
             catch(Exception ex)
             {
                 return new ReturnValue
@@ -348,7 +340,7 @@ namespace PuppyLearn.Services
             }
             
         }
-        public async Task<ReturnValue> GetUserBookById(Guid bookId,Guid userId, CancellationToken cancellationToken)
+        public async Task<ReturnValue> GetUserBookByIdAsync(Guid bookId,Guid userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -373,15 +365,6 @@ namespace PuppyLearn.Services
                     };
                 }
             }
-            catch (OperationCanceledException ex)
-            {
-                return new ReturnValue
-                {
-                    Value = ex.Message,
-                    Msg = "用户取消GetUserBookById",
-                    HttpCode = HttpStatusCode.BadRequest
-                };
-            }
             catch (Exception ex)
             {
                 return new ReturnValue
@@ -392,7 +375,7 @@ namespace PuppyLearn.Services
                 };
             }
         }
-        public async Task<ReturnValue> GetWordReports(int skip, int take, CancellationToken cancellationToken)
+        public async Task<ReturnValue> GetWordReportsAsync(int skip, int take, CancellationToken cancellationToken)
         {
             try
             {
@@ -443,15 +426,6 @@ namespace PuppyLearn.Services
                     };
                 }
             }
-            catch (OperationCanceledException ex)
-            {
-                return new ReturnValue
-                {
-                    Value = ex.Message,
-                    Msg = "用户取消GetWordReports",
-                    HttpCode = HttpStatusCode.BadRequest
-                };
-            }
             catch (Exception ex)
             {
                 return new ReturnValue
@@ -462,7 +436,7 @@ namespace PuppyLearn.Services
                 };
             }
         }
-        public async Task<ReturnValue> UpdateAWordReport(Guid reportId, CancellationToken cancellationToken)
+        public async Task<ReturnValue> UpdateAWordReportAsync(Guid reportId, CancellationToken cancellationToken)
         {
             try
             {
@@ -493,14 +467,62 @@ namespace PuppyLearn.Services
                     };
                 }
             }
-            catch (OperationCanceledException ex)
+            catch (Exception ex)
             {
                 return new ReturnValue
                 {
                     Value = ex.Message,
-                    Msg = "用户取消UpdateAWordReport",
+                    Msg = "error",
                     HttpCode = HttpStatusCode.BadRequest
                 };
+            }
+        }
+
+        public async Task<ReturnValue> GetWordsByTrans(string trans, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    var idList = await _context.Trans.AsNoTracking().Where(x=>x.TransCn.Contains(trans)).Select(x=>x.WordId).ToListAsync();
+                    var res = await _context.Words.AsNoTracking().Where(x => idList.Contains(x.Id))
+                        .Select(x => new WordDto
+                        {
+                            Id = x.Id,
+                            WordName = x.WordName,
+                            BookId = x.BookId,
+                            BookNameCh = x.Book.BookNameCh,
+                            Ukphone = x.Ukphone,
+                            Usphone = x.Usphone,
+                            Ukspeech = x.Ukspeech,
+                            Usspeech = x.Usspeech,
+                            Phone = x.Phone,
+                            Speech = x.Speech,
+                            Cognates = _mapper.Map<List<CognatesDto>>(x.Cognates),
+                            Phrases = _mapper.Map<List<PhraseDto>>(x.Phrases),
+                            RemMethods = _mapper.Map<List<RemMethodDto>>(x.RemMethods),
+                            Sentences = _mapper.Map<List<SentenceDto>>(x.Sentences),
+                            SingleChoiceQuestions = _mapper.Map<List<SingleChoiceQuestionDto>>(x.SingleChoiceQuestions),
+                            Synonymous = _mapper.Map<List<SynonymousDto>>(x.Synonymous),
+                            Trans = _mapper.Map<List<TranDto>>(x.Trans)
+                        }).ToListAsync();
+                    return new ReturnValue
+                    {
+                        Value = res,
+                        Msg = "查询成功，返回结果",
+                        HttpCode = HttpStatusCode.OK
+                    };
+                }
+                else
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return new ReturnValue
+                    {
+                        Value = null,
+                        Msg = "用户取消GetWordsByTrans",
+                        HttpCode = HttpStatusCode.BadRequest
+                    };
+                }
             }
             catch (Exception ex)
             {
@@ -515,3 +537,4 @@ namespace PuppyLearn.Services
     
     }
 }
+ 
