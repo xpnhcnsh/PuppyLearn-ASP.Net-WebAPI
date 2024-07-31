@@ -1108,8 +1108,9 @@ namespace PuppyLearn.Services
 
                     #region construct New Word List
                     int newCount = wordsCount - oldWordId.Count();
+                    List<Guid> AllOldWordIdList = _context.Progresses.AsNoTracking().Where(x=>x.UserId == userId && x.BookId == bookId).Select(x=>x.WordId).ToList();
                     var newWordsDto = await _context.Words.AsNoTracking()
-                        .Where(x => x.BookId == bookId && oldWordId.All(id => id != x.Id) && statusNullWordIds.All(id=>id!=x.Id))
+                        .Where(x => x.BookId == bookId && AllOldWordIdList.All(id => id != x.Id))
                         .OrderBy(x => Guid.NewGuid())
                         .Take(newCount)
                         .Select(x => new WordDto
