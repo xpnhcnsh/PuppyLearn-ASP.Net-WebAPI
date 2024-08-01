@@ -6,7 +6,7 @@
     public class LearnTransDto
     {
         public WordDto WordDto { get; set; } = null!;
-        public List<string> Options { get; set; } = null!;
+        public List<MiniTrans> Options { get; set; } = null!;
         public int RightAnIdx { get; set; }
         public int? WordStatus { get; set; }
         /// <summary>

@@ -1141,6 +1141,7 @@ namespace PuppyLearn.Services
                         .Select(y => new MiniTrans
                         {
                             TransAllInOne = string.Join(";", y.Select(p => $"{p.Pos!.Trim()}: {p.TransCn}").ToList()),
+                            WordName = _context.Words.Where(x=>x.Id == (Guid)y.Select(p=>p.WordId).Distinct().Single()!).Select(x=>x.WordName).Single(),
                             WordId = (Guid)y.Select(p => p.WordId).Distinct().Single()!
                         });
                     var wrongOptions = await _context.Words
@@ -1151,17 +1152,18 @@ namespace PuppyLearn.Services
                         .Select(y => new MiniTrans
                         {
                             TransAllInOne = string.Join(";", y.Select(p => $"{p.Pos!.Trim()}: {p.TransCn}").ToList()),
+                            WordName = _context.Words.Where(x => x.Id == (Guid)y.Select(p => p.WordId).Distinct().Single()!).Select(x => x.WordName).Single(),
                             WordId = (Guid)y.Select(p => p.WordId).Distinct().Single()!
                         }).ToListAsync();
                     var wrongOptionsQue = new Queue<MiniTrans>(wrongOptions.OrderBy(x => Guid.NewGuid().GetHashCode()));
                     foreach (var wordDto in wordsDtoList)
                     {
                         var rightIdx = new Random(Guid.NewGuid().GetHashCode()).Next(0, 4);
-                        string trueOption = trueOptions.Where(x => x.WordId == wordDto.Id).Select(x => x.TransAllInOne).Single();
-                        List<string> options = new List<string>();
-                        options.Add(wrongOptionsQue.Dequeue().TransAllInOne);
-                        options.Add(wrongOptionsQue.Dequeue().TransAllInOne);
-                        options.Add(wrongOptionsQue.Dequeue().TransAllInOne);
+                        MiniTrans trueOption = trueOptions.Where(x => x.WordId == wordDto.Id).Select(x => x).Single();
+                        List<MiniTrans> options = new List<MiniTrans>();
+                        options.Add(wrongOptionsQue.Dequeue());
+                        options.Add(wrongOptionsQue.Dequeue());
+                        options.Add(wrongOptionsQue.Dequeue());
                         options.Insert(rightIdx, trueOption);
                         LearnTransDto temp = new LearnTransDto
                         {
