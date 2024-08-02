@@ -1252,12 +1252,13 @@ namespace PuppyLearn.Services
                     {
                         int? wordStatusOffset = words.Where(x => x.WordDto.Id == toUpdateProgressEntry.WordId).Select(x => x.WordStatusOffset).Single()!;
                         var newStatus = toUpdateProgressEntry.Status + wordStatusOffset;
-                        if (newStatus == 4)
+                        if (newStatus >= 3)
                         {
                             newStatus = 3;
                         }
-                        else if(newStatus == 0)
+                        else if(newStatus <= 0)
                         {
+                            newStatus = 0;
                             wordsDoneOffset++;
                         }
                         toUpdateProgressEntry.Status = (int)newStatus;

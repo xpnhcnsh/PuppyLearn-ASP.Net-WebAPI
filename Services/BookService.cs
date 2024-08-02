@@ -6,7 +6,6 @@ using PuppyLearn.Models.Dto;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
 using System.Net;
-using System.Threading;
 
 namespace PuppyLearn.Services
 {
@@ -375,7 +374,7 @@ namespace PuppyLearn.Services
                 };
             }
         }
-        public async Task<ReturnValue> GetWordReportsAsync(int skip, int take, CancellationToken cancellationToken)
+        public async Task<ReturnValue> GetWordReportsAsync(int skip, int take,string sortField, int sortOrder, TableFilters tableFilter, CancellationToken cancellationToken)
         {
             try
             {
@@ -391,7 +390,10 @@ namespace PuppyLearn.Services
                         };
                     }
                     int totalRecords = await _context.WordReports.CountAsync(cancellationToken);
-                    var reportList = await _context.WordReports.AsNoTracking()
+                    PagedResponseDto<WordReportGetDto>? res = null;
+                    if (tableFilter.Msg == "noFilters")
+                    {
+                        var reportList = await _context.WordReports.AsNoTracking()
                         .OrderByDescending(x => x.SubmitTime)
                         .Skip(skip)
                         .Take(take)
@@ -407,7 +409,23 @@ namespace PuppyLearn.Services
                             BookNameCh = x.Word.Book.BookNameCh!,
                         })
                         .ToListAsync(cancellationToken);
-                    var res = new PagedResponseDto<WordReportGetDto>(skip, take, totalRecords, reportList);
+                        res = new PagedResponseDto<WordReportGetDto>(skip, take, totalRecords, reportList);
+                    }
+                    else
+                    {
+                        var filter = tableFilter.Filters;
+                        var wordNameContains = tableFilter.Filters!["wordName"].Select(x=>x.Value).ToList();
+                        var bookNameContains = tableFilter.Filters!["bookNameCh"].Select(x => x.Value).ToList();
+                        var fieldsContains = tableFilter.Filters!["fields"].Select(x => x.Value).ToList();
+                        var reportDateContains = tableFilter.Filters!["reportDate"].Select(x => 
+                        {
+                            var dateTime = DateTime.Parse(x.Value);
+                            return DateOnly.FromDateTime(dateTime);
+                        }).ToList();
+                        var statusContains = tableFilter.Filters!["status"].Select(x => x.Value).ToList();
+                        var userEmailContains = tableFilter.Filters!["userEmail"].Select(x => x.Value).ToList();
+                    }
+                    
                     return new ReturnValue
                     {
                         Value = res,

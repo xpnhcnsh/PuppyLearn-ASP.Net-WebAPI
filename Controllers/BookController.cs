@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PuppyLearn.Models;
 using PuppyLearn.Services.Interfaces;
 using PuppyLearn.Utilities;
 
@@ -42,11 +43,11 @@ namespace PuppyLearn.Controllers
             return await _bookService.GetBookListAsync(cancellationToken);
         }
 
-        [HttpGet("wordreports/{skip}/{take}")]
+        [HttpPost("wordreports/{skip}/{take}/{sortField}/{sortOrder}")]
         [AuthorizeRoles(Roles.admin, Roles.superAdmin)]
-        public async Task<ReturnValue> GetWordReportsAsync([FromRoute] int skip, [FromRoute] int take, CancellationToken cancellationToken)
+        public async Task<ReturnValue> GetWordReportsAsync([FromRoute] int skip, [FromRoute] int take,[FromRoute] string sortField,[FromRoute] int sortOrder,[FromBody] TableFilters tableFilter, CancellationToken cancellationToken)
         {
-            return await _bookService.GetWordReportsAsync(skip, take, cancellationToken);
+            return await _bookService.GetWordReportsAsync(skip, take, sortField, sortOrder, tableFilter, cancellationToken);
         }
 
         [HttpPost("wordreport/{reportId}")]
