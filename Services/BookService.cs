@@ -333,7 +333,7 @@ namespace PuppyLearn.Services
                 return new ReturnValue
                 {
                     Value = ex.Message,
-                    Msg = "error",
+                    Msg = ex.Message,
                     HttpCode = HttpStatusCode.BadRequest
                 };
             }
@@ -405,7 +405,7 @@ namespace PuppyLearn.Services
                             Comments = x.Comment,
                             ReportDate = x.SubmitTime,
                             UserEmail = x.User.Email,
-                            Status = x.Status == false ? "未处理" : "已处理",
+                            Status = x.Status == false ? "未处理" : "已处理", 
                             BookNameCh = x.Word.Book.BookNameCh!,
                         })
                         .ToListAsync(cancellationToken);
@@ -414,18 +414,25 @@ namespace PuppyLearn.Services
                     else
                     {
                         var filter = tableFilter.Filters;
-                        var wordNameContains = tableFilter.Filters!["wordName"].Select(x=>x.Value).ToList();
-                        var bookNameContains = tableFilter.Filters!["bookNameCh"].Select(x => x.Value).ToList();
-                        var fieldsContains = tableFilter.Filters!["fields"].Select(x => x.Value).ToList();
-                        var reportDateContains = tableFilter.Filters!["reportDate"].Select(x => 
+                        var filteredRes = await _context.WordReports
+                            .Include(x=>x.User)
+                            .Include(x=>x.Word)
+                            .Include(x=>x.Word).ThenInclude(y=>y.Book)
+                            .AsNoTracking().ApplyFilterAsync(filter!, skip, take, sortField, sortOrder == 1 ? true:false);
+                        var reportList = filteredRes.Select(x => new WordReportGetDto
                         {
-                            var dateTime = DateTime.Parse(x.Value);
-                            return DateOnly.FromDateTime(dateTime);
+                            Id = x.Id,
+                            WordName = x.Word.WordName,
+                            Fields = x.Fields,
+                            Comments = x.Comment,
+                            ReportDate = x.SubmitTime,
+                            UserEmail = x.User.Email,
+                            Status = x.Status == false ? "未处理" : "已处理",
+                            BookNameCh = x.Word.Book.BookNameCh!,
                         }).ToList();
-                        var statusContains = tableFilter.Filters!["status"].Select(x => x.Value).ToList();
-                        var userEmailContains = tableFilter.Filters!["userEmail"].Select(x => x.Value).ToList();
+                        totalRecords = reportList.Count;
+                        res = new PagedResponseDto<WordReportGetDto>(skip, take, totalRecords, reportList);
                     }
-                    
                     return new ReturnValue
                     {
                         Value = res,

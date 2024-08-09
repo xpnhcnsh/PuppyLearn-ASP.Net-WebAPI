@@ -1,10 +1,12 @@
-﻿using PuppyLearn.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using PuppyLearn.Models;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace PuppyLearn.Utilities
 {
     public static class Global
     {
-        
         public static string GetAccountTypeStr(int index)
         {
             if (index == 1)
@@ -169,10 +171,181 @@ namespace PuppyLearn.Utilities
             Status2 = 2,
             Status3 = 3
         } 
+
+        public static async Task<IEnumerable<T>> ApplyFilterAsync<T>(this IQueryable<T> query, Dictionary<string, List<FilterMetadata>> filters, int skip, int take, string sortField, bool sortOrder)
+        {
+            try
+            {
+                foreach (var filter in filters)
+                {
+                    if (filter.Value.All(x => x.Value != null))
+                    {
+                        query = query.Where(GetWhereExpressions<T>(filter));
+                    }
+                }
+                query = sortOrder ?
+                    query.OrderBy(GetSortExpression<T>(sortField)) : query.OrderByDescending(GetSortExpression<T>(sortField));
+                return await query.Skip(skip).Take(take).ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// return expression like "bookNameCh=='IELTS'", Value:'IELTS', PropName:'bookNameCh',MatchMode:'=='
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="PropName"></param>
+        /// <param name="MatchMode"></param>
+        /// <param name="Constant"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidFilterCriteriaException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        private static Expression GetFilterExpression(object Value,Expression PropName,string MatchMode)
+        {
+            try
+            {
+                var targetType = PropName.Type;
+                if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    targetType = Nullable.GetUnderlyingType(targetType);
+                //"IELTS英语词汇" constExpression
+                object V = Value switch
+                {
+                    "已处理" or "1" => true,
+                    "未处理" or "0" => false,
+                    _ => Value,
+                };
+                Value = V;
+                ConstantExpression constExpression = Expression.Constant(Convert.ChangeType(Value, targetType!), PropName.Type);
+                switch (MatchMode)
+                {
+                    case "contains":
+                        if (Value.GetType() != typeof(string))
+                            throw new InvalidFilterCriteriaException();
+                        var containsMethodInfo = typeof(string).GetMethod(nameof(string.Contains), new Type[] { typeof(string) });
+                        return Expression.Call(PropName, containsMethodInfo!, constExpression);
+                    case "notContains":
+                        if (Value.GetType() != typeof(string))
+                            throw new InvalidFilterCriteriaException();
+                        var notContainsMethodInfo = typeof(string).GetMethod(nameof(string.Contains), new Type[] { typeof(string) });
+                        return Expression.Not(Expression.Call(PropName, notContainsMethodInfo!, constExpression));
+                    case "startsWith":
+                        if (Value.GetType() != typeof(string))
+                            throw new InvalidFilterCriteriaException();
+                        var startsWithMethodInfo = typeof(string).GetMethod(nameof(string.StartsWith), new Type[] { typeof(string) });
+                        return Expression.Call(PropName, startsWithMethodInfo!, constExpression);
+                    case "endsWith":
+                        if (Value.GetType() != typeof(string))
+                            throw new InvalidFilterCriteriaException();
+                        var endsWithMethodInfo = typeof(string).GetMethod(nameof(string.EndsWith), new Type[] { typeof(string) });
+                        return Expression.Call(PropName, endsWithMethodInfo!, constExpression);
+                    case "equals":
+                        return Expression.Equal(PropName, constExpression);
+                    case "notEquals":
+                        return Expression.Not(Expression.Equal(PropName, constExpression));
+                    case "dateIs":
+                        PropName = Expression.PropertyOrField(PropName, "Date");
+                        return Expression.Equal(PropName, constExpression);
+                    case "dateIsNot":
+                        PropName = Expression.PropertyOrField(PropName, "Date");
+                        return Expression.Not(Expression.Equal(PropName, constExpression));
+                    case "dateBefore":
+                        PropName = Expression.PropertyOrField(PropName, "Date");
+                        return Expression.LessThanOrEqual(PropName, constExpression);
+                    case "dateAfter":
+                        PropName = Expression.PropertyOrField(PropName, "Date");
+                        return Expression.GreaterThanOrEqual(PropName, constExpression);
+                    default:
+                        throw new InvalidOperationException($"Unsupported MatchMode: {MatchMode}");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private static Expression<Func<T, bool>> GetWhereExpressions<T>(KeyValuePair<string, List<FilterMetadata>> filters)
+        {
+            try
+            {
+                //x=>
+                var paramter = Expression.Parameter(typeof(T), "x");
+                Expression? filterExpression = null;
+                if (filters.Value.Any(x => x.Value != null))
+                {
+                    //这里如果key是"wordName","bookName"或"userEmail"，必须改成"Word.WordName","Word.Book.BookNameCh"和"User.Email";
+                    string field = filters.Key switch
+                    {
+                        "wordName" => "Word.WordName",
+                        "bookNameCh" => "Word.Book.BookNameCh",
+                        "userEmail" => "User.Email",
+                        "reportDate" => "SubmitTime",
+                        _ => filters.Key,
+                    };
+                    //x.Word.WordName
+                    Expression propName = paramter;
+                    foreach (var memeber in field.Split("."))
+                    {
+                        propName = Expression.PropertyOrField(propName, memeber);
+                    }
+
+                    if (filters.Value.Count == 1 && filters.Value[0].Value != null)
+                    {
+                        filterExpression = GetFilterExpression(filters.Value[0].Value!, propName, filters.Value[0].MatchMode!);
+                    }
+                    else if (filters.Value.Count == 2 && filters.Value.All(x => x.Value != null))
+                    {
+                        var op = filters.Value.Select(x => x.Operator).Distinct().Single();
+                        Expression leftExpression = GetFilterExpression(filters.Value[0].Value!, propName, filters.Value[0].MatchMode!);
+                        Expression rightExpression = GetFilterExpression(filters.Value[1].Value!, propName, filters.Value[1].MatchMode!);
+                        if (op == "and")
+                        {
+                            filterExpression = Expression.AndAlso(leftExpression, rightExpression);
+                        }
+                        else if (op == "or")
+                        {
+                            filterExpression = Expression.OrElse(leftExpression, rightExpression);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Unsupported Operator: {op}");
+                        }
+                    }
+                }
+                return Expression.Lambda<Func<T, bool>>(filterExpression!, paramter);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private static Expression<Func<T, object>> GetSortExpression<T>(string sortField)
+        {
+            string field = sortField switch
+            {
+                "reportDate" => "SubmitTime",
+                _=>sortField
+            };
+            var prop = Expression.Parameter(typeof(T),"x");
+            var property = Expression.PropertyOrField(prop, field);
+            var res = Expression.Lambda<Func<T, object>>(Expression.Convert(property, typeof(object)), prop);
+            return res;
+        }
     }
 
     static class ListExtension
     {
+        /// <summary>
+        /// list extension method, remove item at index and return the result list.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public static T RemoveThenReturn<T>(this List<T> list, int index)
         {
             T element = list[index];
