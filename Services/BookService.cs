@@ -389,10 +389,11 @@ namespace PuppyLearn.Services
                             HttpCode = HttpStatusCode.BadRequest
                         };
                     }
-                    int totalRecords = await _context.WordReports.CountAsync(cancellationToken);
+                    int totalRecords;
                     PagedResponseDto<WordReportGetDto>? res = null;
                     if (tableFilter.Msg == "noFilters")
                     {
+                        totalRecords = await _context.WordReports.CountAsync(cancellationToken);
                         var reportList = await _context.WordReports.AsNoTracking()
                         .OrderByDescending(x => x.SubmitTime)
                         .Skip(skip)
