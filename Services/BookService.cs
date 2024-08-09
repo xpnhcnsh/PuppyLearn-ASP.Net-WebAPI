@@ -413,12 +413,11 @@ namespace PuppyLearn.Services
                     }
                     else
                     {
-                        var filter = tableFilter.Filters;
                         var filteredRes = await _context.WordReports
                             .Include(x=>x.User)
                             .Include(x=>x.Word)
                             .Include(x=>x.Word).ThenInclude(y=>y.Book)
-                            .AsNoTracking().ApplyFilterAsync(filter!, skip, take, sortField, sortOrder == 1 ? true:false);
+                            .AsNoTracking().ApplyFilterAsync(tableFilter.Filters!, skip, take, sortField, sortOrder == -1 ? true:false);
                         var reportList = filteredRes.Select(x => new WordReportGetDto
                         {
                             Id = x.Id,
